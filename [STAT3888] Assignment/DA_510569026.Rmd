@@ -1,0 +1,1406 @@
+---
+title: '[STAT3888] Disclipinary Assignment'
+author: "SID:510569026"
+date: "2024-08-29"
+output: 
+  html_document:
+    code_folding: hide
+    toc: yes
+    theme: journal
+    toc_float: true
+---
+
+# 0. Preparation
+
+## 0.1. Libraries import
+
+```{r libraries_import, message=FALSE, warning=FALSE}
+library(formattable)
+library(factoextra)
+library(tidyverse)
+library(stringr)
+library(cluster)
+library(plotly)
+library(pander)
+library(naniar)
+library(knitr)
+library(caret)
+library(dplyr)
+library(here)
+library(grid)
+library(VIM)
+library(gt)
+library(DT)
+```
+
+## 0.2. Reading data
+
+```{r data_read, warning = FALSE, message = FALSE}
+load(here::here('tech_data.Rdata'))
+```
+
+# 1. Executive summary
+
+-   Throughout this report, we did some exploratory data analysis with the given `tech_biom` dataset together with its dictionary `dict_biom`. `tech_biom` has also further cleaned so that no missing values exist in its latest version. This have been done by dropping unhelpful columns, removing observations where too many features are not recorded, and filling in the missing values with a sensible value.
+
+-   During the exploratory data analysis, we have found out that, for a number of cases, some of the fields, although being defined by the data dictionary as related to each other, appear to be inconsistent to each other. This logical error has also been fixed later within this report. Some notable inconsistencies between the dataset with its dictionary are also indicated in this document. We have also looked at the distribution of missing values to detect any pattern, and later, propose some feasible research question that could be answered by studying the given dataset.
+
+-   Regarding the proposed research questions in section 6 of this report, I reckon the first one *(how does diet impact systolic and diastolic blood pressure levels?)* to be the most feasible to pursue, as not too many values of the response variables have been changed compared to its original version, thus, a reliable conclusion from this study.
+
+# 2. Check types of each variables
+
+```{r structure, warning = FALSE, message = FALSE}
+str(tech_biom)
+```
+
+-   The above code chunk specifies the structure of `tech_biom`. As can be seen from the output, this dataset has 12153 observations and 94 variables in total. The `str()` function also gives us the data type, as well as some of the first few values, of each variable. By merely looking at this information, some variables whose type needs more investigation would be:
+
+    -   `EXLWTBC`: currently stored as a factor with 290 levels, whose values are all numbers
+
+    -   `EXLWMBC`: currently stored as a factor with 71 levels, whose values are all numbers
+
+    -   `EXLWVBC`: currently stored as a factor with 102 levels, whose values are all numbers
+
+-   Next, by referring to `dict_biom`, we could understand more about these variables, and thus, being able to choose the optimal data type for each of them
+
+    -   `EXLWTBC`
+
+        ```{r exlwtbc_def, warning = FALSE, message = FALSE}
+        dict_biom |> filter(variable_name == 'EXLWTBC') |> datatable(caption = 'Definition of EXLWTBC', options = list(scrollX = TRUE))
+        ```
+
+        Given the definition of `EXLWTBC`, it should rather be stored as a numerical variable
+
+        ```{r exlwtbc_fix, warning = FALSE, message = FALSE}
+        # change data type of exlwtbc to numeric
+        tech_biom$EXLWTBC = tech_biom$EXLWTBC |> as.character() |> as.numeric()
+        ```
+
+    -   `EXLWMBC`
+
+        ```{r exlwmbc_def, warning = FALSE, message = FALSE}
+        dict_biom |> filter(variable_name == 'EXLWMBC') |> datatable(caption = 'Definition of EXLWMBC')
+        ```
+
+        By its definition, `EXLWMBC` should also be saved as a numerical variable instead
+
+        ```{r exlwmbc_fix, warning = FALSE, message = FALSE}
+        # change data type of exlwmbc to numeric
+        tech_biom$EXLWMBC = tech_biom$EXLWMBC |> as.character() |> as.numeric()
+        ```
+
+    -   `EXLWVBC`
+
+        ```{r exlwvbc_def, warning = FALSE, message = FALSE}
+        dict_biom |> filter(variable_name == 'EXLWVBC') |> datatable(caption = 'Definition of EXLWVBC', options = list(scrollX = TRUE))
+        ```
+
+        Similar to the above cases, `EXLWVBC` should also be recognized as a numerical variable
+
+        ```{r exlwvbc_fix, warning = FALSE, message = FALSE}
+        # change data type of exlwvbc to numeric
+        tech_biom$EXLWVBC = tech_biom$EXLWVBC |> as.character() |> as.numeric()
+        ```
+
+# 3. Exploratory data analysis
+
+## 3.1. Problems with cleaning the data
+
+-   One issue remaining with the data cleaning after running the code given in the assignment specification is the inappropriate data type for some variables, which has been explained in details, and dealt with, in section 2 above
+
+-   Some inconsistent points between `tech_biom` and `dict_biom` still exist, which would be elaborated in section 3.5 of this report
+
+-   Other than that, the given code has done pretty much everything to turn the raw data into its technically correct version
+
+## 3.2. Identifications of outliers
+
+-   For this part of the report, only numerical variables would be of concern. Hence, we could create a subset of the original data to focus on
+
+```{r subset_numerical_only, message = FALSE, warning = FALSE}
+# filter out to get a sub-dataset of tech_biom with only numerical variables
+num_biom = tech_biom |> select_if(is.numeric)
+```
+
+-   Outliers could be detected visually in a box plot. Thus, sketching out a box plot for each of the variables might effectively illustrate how outliers are distributed, and even give a rough approximation of the number of abnormal values.
+
+```{r outliers_boxplot, warning = FALSE, message = FALSE}
+# boxplot visualization of each numerical variable
+bmisc_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~BMISC, x = replicate(dim(num_biom)[1], 0), name = "BMISC")
+agec_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~AGEC, x = replicate(dim(num_biom)[1], 0), name = 'AGEC')
+phdkgwbc_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~PHDKGWBC, x = replicate(dim(num_biom)[1], 0), name = 'PHDKGWBC')
+phdcmhbc_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~PHDCMHBC, x = replicate(dim(num_biom)[1], 0), name = 'PHDCMHBC')
+phdcmwbc_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~PHDCMWBC, x = replicate(dim(num_biom)[1], 0), name = 'PHDCMWBC')
+adtotse_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~ADTOTSE, x = replicate(dim(num_biom)[1], 0), name = 'ADTOTSE')
+diastol_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~DIASTOL, x = replicate(dim(num_biom)[1], 0), name = 'DIASTOL')
+slptime_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~SLPTIME, x = replicate(dim(num_biom)[1], 0), name = 'SLPTIME')
+systol_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~SYSTOL, x = replicate(dim(num_biom)[1], 0), name = 'SYSTOL')
+exlwtbc_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~EXLWTBC, x = replicate(dim(num_biom)[1], 0), name = 'EXLWTBC')
+exlwmbc_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~EXLWMBC, x = replicate(dim(num_biom)[1], 0), name = 'EXLWMBC')
+exlwvbc_outliers_fig = plot_ly(data = num_biom, type = 'box', y = ~EXLWVBC, x = replicate(dim(num_biom)[1], 0), name = 'EXLWVBC')
+plotly::subplot(bmisc_outliers_fig, agec_outliers_fig, phdkgwbc_outliers_fig, phdcmhbc_outliers_fig, phdcmwbc_outliers_fig, adtotse_outliers_fig, diastol_outliers_fig, slptime_outliers_fig, systol_outliers_fig, exlwtbc_outliers_fig, exlwmbc_outliers_fig, exlwvbc_outliers_fig, nrows = 4) |> layout(title = 'Boxplots illustrating numerical variables in tech_biom')
+```
+
+-   An observation of the above illustration indicates some notable points:
+
+    -   `AGEC` records appear to have no outliers
+
+    -   `PHDCMWBC` values only have a relatively small number of outliers
+
+    -   `EXLWTBC`, `EXLWMBC` and `EXLWVBC` have roughly the same extreme outlier values of about 10,000, which is significantly greater than other values recorded
+
+    -   `BMISC` and `ADTOTSE` only have outliers above the upper whiskers
+
+    -   `PHDCMHBC`, on the other hand, only records unusual observations under its lower whisker
+
+    -   `PHDKGWBC`, `DIASTOL`, `SLPTIME`, and `SYSTOL` have outliers lying in both directions of the whiskers. However, the majority of them were registered in the upper areas
+
+-   The following code chunks use mathematical calculations to work out the precise number of outliers within each variables
+
+-   By convention, an observation is considered "unusual" if it is $1.5\times IQR$ away from the $1^{st}$ and the $3^{rd}$ quartiles. Specifically, an observation $X$ is considered to be normal if:
+
+    $$
+    Q_1 - 1.5\times IQR\ <\ X\ <\ Q_3 + 1.5\times IQR 
+    $$
+
+    -   $Q_1$: the $1^{st}$ quartile of the dataser
+
+    -   $Q_3$: the $3^{rd}$ quartile of the dataset
+
+    -   $IQR\ \ (\ = Q_3 - Q_1\ )$: the interquartile range of the dataset
+
+-   Following this IQR outliers rule, the code chunk below would decide on whether an observation is unusual, and count the total number of such values in each variable
+
+```{r outliers_identification, warning = FALSE, message = FALSE}
+# calculate the nuumber of outliers in each of the observed numerical variables
+summary = skimr::skim(num_biom)
+# store some summary statistics in variables
+mean = summary[5]
+med = summary[9]
+p25 = summary[8]
+p75 = summary[10]
+sd = summary[6]
+nas = summary[3]
+# calculate the iqr range
+iqr = p75 - p25
+# caclulate the upper threshold
+lower = p25 - 1.5 * iqr
+upper = p75 + 1.5 * iqr
+# count the number of outliers in each of the numerical variables
+outliers = replicate(dim(num_biom)[2], 0)
+for (row in c(1:dim(num_biom)[1])){
+  for (col in c(1:dim(num_biom)[2])) {
+    if (is.na(num_biom[row, col])){
+      next
+    }
+    if(num_biom[row, col] < lower[col, ] | num_biom[row, col] > upper[col, ]) {
+      outliers[col] = outliers[col] + 1
+    }
+  }
+}
+# numerical variables vs. its outliers
+non_missing = dim(num_biom)[1] - nas
+outliers_ratio = outliers / non_missing
+colnames(outliers_ratio) = 'rate'
+outliers_ratio = outliers_ratio$rate |> percent(4) |> as.character()
+data_frame(variables = colnames(num_biom), outliers, non_missing, outliers_ratio) |>  datatable(colnames = c('variable_name', 'outliers', 'non_missing_values', 'outliers_ratio'), caption = 'Outliers summary for numerical variables in tech_biom', options = list(scrollX = TRUE))
+```
+
+-   According to the table summary of outliers above, `AGEC` is the only variable with no unusual observations
+
+-   For most of the variables investigated, less than 3% of their values are considered abnormal
+
+-   `PHDCMHBC` records a little higher proportion of outliers than the majority (9%)
+
+-   `EXLWTBC`, `EXLWMBC` and `EXLWVBC` are those with the highest rate of outliers - approximately 23% of the total number of their non_NA values. Referring back to the box plots earlier, it is highly likely that most of these outliers are the maximum values, which is extremely greater than the rest. This finding suggests that there might be some interesting pattern uder this outlier. Thus, this extreme point should be further investigated in the following sub-section 3.2 about logical inconsistency
+
+-   In the cleaning stage, some possible approaches to treating these outliers include:
+
+    -   Double-checking with the domain knowledge to see whether the outliers are real values
+
+    -   If not, data imputation could be utilized. The imputative values should be decided case by case, with regards to their specific characteristics, in order to be seen as justifiable
+
+## 3.3. Logical inconsistencies
+
+### 3.3.1. BMISC vs. PHDKGWBC and PHDCMHBC
+
+-   **`BMISC`** : Body Mass Index *(BMI)*
+
+-   **`PHDKGWBC`** : Measured weight *(kg)*
+
+-   **`PHDCMHBC`** : Measured height *(cm)*
+
+-   The Body Mass Index is calculated according to weight and height:
+
+    $$
+    BMI = \frac{weight\ (kg)}{height^2\ (m)}
+    $$
+
+-   Hence, the value of `BMISC` should be consistent with that of `PHDKGWBC` and `PHDCMHBC` in every observation
+
+```{r bmisc_check, warning = FALSE, message = FALSE}
+# extract the bmisc column in the original dataset into a separate vector for later comparison
+bmisc = tech_biom$BMISC |> round(2)
+# convert phdcmhbc from cm to m
+height_m = tech_biom$PHDCMHBC / 100
+# calculate the bmi for each observation based on the givn height and weight
+bmi_cal = tech_biom$PHDKGWBC/(height_m^2)
+# since bmisc is rounded to 2 decimal points, for comparison purpose, round bmi_cal to 2 dps
+bmi_cal = round(bmi_cal, 2)
+# create a dataframe to compare the values stored in bmisc and bmi_cal
+bmi_compare = data_frame(tech_biom = bmisc, calculation = bmi_cal, bmisc_check = bmisc == bmi_cal)
+# have a look at observations where the information given by the data is different from the calculation
+bmi_compare |> filter(bmisc == FALSE) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where BMI recorded and calculated are different')
+```
+
+-   The empty table above has proven the logical consistency between `BMISC`, `PHDKGWBC`, and **`PHDCMHBC`**
+
+### 3.3.2. EXLWTBC, EXLWMBC, and EXLWVBC
+
+-   **`EXLWTBC`** : total mins undertaken physical activity in last week
+
+-   **`EXLWMBC`** : total mins undertaken moderate physical activity in last week
+
+-   **`EXLWVBC`** : total mins undertaken vigorous physical activity in last week
+
+-   The intensity level of physical activities could be divided into mild, moderate and vigorous. Therefore, `EXLWTBC` would record the total time spent on all intensity-level exercises, while `EXLWMBC` and `EXLWVBC` would only take into account the 2nd and 3rd type, respectively.
+
+-   Hence, a check for consistency regarding these 3 variables include realism-check for values in each variable, and then checking if the former has included the latter 2 in it, i.e. $\text{EXLWTBC} > \text{EXLWMBC} + \text{EXLWVBC}$
+
+```{r ex_range, warning = FALSE, message = FALSE}
+# extract and store each each column in a separate variable for conventional call-out later
+total_ex = tech_biom$EXLWTBC 
+mod_ex = tech_biom$EXLWMBC
+vig_ex = tech_biom$EXLWVBC
+# convert into hours per week
+total_ex_hour = total_ex / 60
+mod_ex_hour = mod_ex / 60
+vig_ex_hour = vig_ex / 60
+# look into the range of each variable
+data.frame(variable = c('total_ex', 'moderate_ex', 'vigorous_ex'), 
+      min = c(round(min(total_ex_hour, na.rm = TRUE), 2),
+        round(min(mod_ex_hour, na.rm = TRUE),2),
+        round(min(vig_ex_hour, na.rm = TRUE),2)),
+      max = c(round(max(total_ex_hour, na.rm = TRUE),2),
+        round(max(mod_ex_hour, na.rm = TRUE),2),
+        round(max(vig_ex_hour, na.rm = TRUE),2))
+      ) |> gt::gt(caption = 'The minimum and maximum time spent on physical activities (hours/week)')
+```
+
+-   The above code chunk converted the unit of the concerned variables from minutes/week to hours/week so that unrealistic values could be detected more easily
+
+-   The table outputted represents each variable's minimum and maximum value measured in hours/week.
+
+-   According to the table, the fewest number of hours spent on exercising, regardless of its type, is 0, which is not quite acceptable. As the observations are recorded per week, if one just lightly walk, for instance, around their house, or commute to work and study,... Then such daily routine that almost everyone has to do, might add up to more than 10 minutes a day, which makes the realistic time spent on total physical activity be 1 hour minimum. However, we could not exclude the possibility that the 0 records are for people with special health conditions, which completely prevent them from physical activities. Hence, we would look at the number of 0s values in `EXLWTBC` before finally confirm about its realism
+
+```{r total_ex_0, warning = FALSE, message = FALSE}
+total_ex_hour[total_ex_hour == 0] |> length()
+```
+
+-   There are 2003 people observed with no exercise at all. Assume that `tech_biom` is representative of the Australian population demographic. Then, according to the data published by the Australian Bureau of Statistics, 5.8% of Australians have a core activity need for assistance. Hence, the upper bound for the number of people with no physical activities is:
+
+```{r no_ex_upper_bound, warning = FALSE, message = FALSE}
+5.8*dim(tech_biom)[1]/100
+```
+
+-   The number of 0 values seen above has significantly exceed its realistic upper bound, which means it should be dealt with in the cleaning process. Most ideally, we could infer from their corresponding indexes to see whether these people really have difficulty in mobility. Nevertheless, this approach might take a lot of time for investigation, and even possibly require the acquisition of a new variable recording people's disability condition. Thus, data imputation could work as a more preferable alternative in this case. Specifically, we could randomly choose 705 observations to keep it as it is, and change the rest to 1, which is conventionally the least time that one could spend on physical activities within a week.
+
+-   Similarly, the maximum values of each variable appears to be illogical as well, since 166.65 hours of total exercising per week means that one has to be active for more than 23 hours a day - which seems to be completely unrealistic! Hence, for a further investigation into the case, the following code chunk would search for and count how many such illogical records appear in the dataset
+
+```{r unrealistic_total_ex, warning = FALSE, message = FALSE}
+total_ex_hour[total_ex_hour > 60] |> length()
+```
+
+-   One suggested approach to fixing these unrealistically large observations is to do imputation based on the median time of exercising for the corresponding age/age range
+
+-   The following part would verify whether there are any logical inconsistencies in the relationship between these 3 variables
+
+```{r ex_relationship_check, warning = FALSE, message = FALSE}
+mod_and_vig_ex = mod_ex + vig_ex
+ex_compare = data_frame(ABSPID = tech_biom$ABSPID, moderate_exercise = mod_ex, vigorous_exercise = vig_ex, total_exercise = total_ex, check = mod_and_vig_ex < total_ex+1)
+ex_compare |> filter(check == FALSE) |> datatable(caption = 'Observations where Total time of physical activities is less than Time spent on Moderate and Vigorous physical activities', options = list(scrollX = TRUE))
+```
+
+-   As specified by the table above, there are 2,732 entries where the hours one spent on vigorous and moderate exercise exceed that of the total time they spent on physical activities in general. Some possible justifications for the case could be:
+
+    -   Misunderstanding of the survey questions. Participants might only spend time on vigorous activities, but still input the same number in moderate and total column, as they thought moderate exercises also include its higher intensity version
+
+    -   Appeal to the crowd. Among the odd observations, there are many of them registered similarly. This might be because people don't know how, or are not willing to honestly answer the question. As a result, they eventually copy responds of each other, which leads to a large amount of similarity in logically inconsistent records.
+
+-   Further investigation into which one is more sensible would eventually decide how this abnormality in logic can be resolved. Specifically,
+
+    -   If it is the 1st case, one recommendation would be to use 0 as the imputation for time spent on moderate exercises, and then introduce a reasonable time for mild activities, like commuting on foot, so as to infer the total exercising time
+
+    -   Otherwise, the median values (excluding these observations) could be used as imputations
+
+-   Overall, the relationship between `EXLWTBC`, `EXLWMBC` and `EXLWVBC` is logically inconsistent, and thus, need further cleaning.
+
+### 3.3.3. DIETQ5, DIETQ8, and DIETRDI
+
+-   **`DIETQ5`** : usual daily serves of vegetables
+
+-   **`DIETQ8`** : usual daily serves of fruits
+
+-   **`DIETRDI`** : whether vegetable and fruit consumption met recommended dietary guidelines
+
+-   As its definition suggests, `DIETRDI` is directly inferred from `DIETQ5` and `DIETQ8`. Thus, for these variables to be logically consistent, `DIETRDI` should reflect exactly the condition of values within the other 2 variables
+
+-   Such consistency check would start with an identification of what is the recommended intake by the dietary guidelines. According to the information found on nutritionaustralia.org, we could create a `guideline` data frame, which serves as the standard to decide on the value of `DIETRDI`
+
+```{r nutrition_guideline, warning = FALSE, message = FALSE}
+# create the dataframe storing the recommendation of the dietary guidelines
+gender = c(replicate(71, 'male'), replicate(71, 'female'))
+age = c(1:71, 1:71)
+veg = c(replicate(1, 2), 
+        replicate(2, 2.5),
+        replicate(5, 4.5), 
+        replicate(3, 5), 
+        replicate(2, 5.5),
+        replicate(5, 5.5),
+        replicate(32, 6),
+        replicate(20, 5.5),
+        replicate(1, 5),
+        replicate(1, 2),
+        replicate(2, 2.5),
+        replicate(5, 4.5),
+        replicate(3, 5),
+        replicate(2, 5),
+        replicate(5,5),
+        replicate(32, 5),
+        replicate(20, 5),
+        replicate(1, 5))
+fruits = c(replicate(1, 0.5), 
+        replicate(2, 1),
+        replicate(5, 1.5), 
+        replicate(3, 2), 
+        replicate(2, 2),
+        replicate(5, 2),
+        replicate(32, 2),
+        replicate(20, 2),
+        replicate(1, 2),
+        replicate(1, 0.5),
+        replicate(2, 1),
+        replicate(5, 1.5),
+        replicate(3, 2),
+        replicate(2, 2),
+        replicate(5,2),
+        replicate(32, 2),
+        replicate(20, 2),
+        replicate(1, 2))
+guideline = data_frame(gender,age,veg, fruits)
+```
+
+-   Then, based on this information from the Australian Nutrition Guidelines, we could work out the value of `DIETRDI` by simply compare one's `DIETQ5` and `DIETQ8` with what is recommended above
+
+```{r dietrdi_inference, warning = FALSE, message = FALSE}
+# infer the status based on guidelines and veg+fruit intake
+diet_status = vector(mode = 'character', length = dim(tech_biom)[1])
+for (i in 1:dim(tech_biom)[1]) {
+  if (is.na(tech_biom$DIETQ5[i])) {
+    diet_status[i] = NA
+    next
+  }
+  veg_in = tech_biom$DIETQ5[i] |> as.numeric()
+  if (is.na(tech_biom$DIETQ8[i])) {
+    diet_status[i] = NA
+    next
+  }
+  fruit_in = tech_biom$DIETQ8[i] |> as.numeric()
+  age_obs = tech_biom$AGEC[i]
+  if (age_obs > 71) {
+    age_obs = 71
+  }
+  if (tech_biom$SEX[i] == 1) {
+    gender_obs = 'male'
+  }
+  else {
+    gender_obs = 'female'
+  }
+  match_guideline = guideline |> filter(gender == gender_obs, age == age_obs)
+  veg_rec = match_guideline$veg
+  fruit_rec = match_guideline$fruits
+  if (veg_in < veg_rec) {
+    diet_status[i] = '2'
+    next
+  }
+  if (fruit_in < fruit_rec) {
+    diet_status[i] = '2'
+    next
+  }
+  diet_status[i] = '1'
+}
+```
+
+```{r dietrdi_check, message = FALSE, warning = FALSE}
+# separately store DIETRDI into a new variable
+dietrdi = tech_biom$DIETRDI |> as.character()
+# compare dietrdi and the inference above
+diet_check_df = data_frame(abspid = tech_biom$ABSPID, dietrdi = tech_biom$DIETRDI, diet_status, check = diet_status == tech_biom$DIETRDI)
+# filter out only the obs where the inference is different from what is stored
+diet_check_df |> filter(check == FALSE) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where DIETRDI is different from the inference from DIETQ5, DIETQ8 and the Australian Nutrition Guidelines')
+```
+
+-   The table above shows that there are 1,636 observations where the `DIETRDI` values are different from the result inferred from its recorded components and the Australian Nutrition Guidelines. Unless the 'recommended dietary guidelines' mentioned in the description of `DIETRDI` is not the Australian Nutrition Guidelines, we should substitute these inconsistent values of `DIETRDI` by the one we have come up with in the code chunk earlier, so that the three variables of concern are logically consistent.
+
+### 3.3.4. ALTNTR vs. ALTRESB
+
+-   `ALTRESB` : records the amount of Alanine aminotranferase *(ALT)* as categories by its range *(U/L)*
+-   `ALTNTR` : records the status of Alanine aminotransferase *(ALT)*
+-   As specified in `dict_biom`, ALT is reckoned to be abnormal if recorded the following levels:
+    -   \> 30U/L for males aged 12-14 years and females aged 12 years and over
+
+    -   \> 40U/L for males aged 15 years and over
+-   It is hence obvious that the values of `ALTNTR` should align closely with `ALTRESB`. Thus, it is vital to check if the former has already been an exact inference of the latter so as to partially confirm for the consistency of `tech_biom`
+
+```{r alt_check, warning = FALSE, message = FALSE}
+# check the altresb and compare it to the given guideline in dict_biom to infer the value of altntr
+alt_infer = vector('character', length = dim(tech_biom)[1])
+for (i in 1:dim(tech_biom)[1]) {
+  if (is.na(tech_biom$ALTRESB[i])) {
+    alt_infer[i] = NaN
+    next
+  }
+  if (tech_biom$SEX[i] == 'male') {
+    if (tech_biom$AGEC[i] < 12) {
+      alt_infer[i] = NaN
+    }
+    else {
+      if (tech_biom$AGEC[i] < 15) {
+        if (as.numeric(as.character(tech_biom$ALTRESB[i])) <= 5) {
+          alt_infer[i] = '1'
+        }
+        else{
+          alt_infer[i] = '2'
+        }
+      }
+      else {
+        if (as.numeric(as.character(tech_biom$ALTRESB[i] <= 7))) {
+          alt_infer[i] = '1'
+        }
+        else{
+          alt_infer[i] = '2'
+        }
+      }
+    }
+  }
+  else{
+    if(tech_biom$AGEC[i] < 12) {
+      alt_infer[i] = NaN
+    }
+    else{
+      if (as.character(as.numeric(tech_biom$ALTRESB[i])) <= 5) {
+        alt_infer[i] = '1'
+      }
+      else {
+        alt_infer[i] = '2'
+      }
+    }
+  }
+}
+# create a dataframe to express the result of comparison
+altntr = tech_biom$ALTNTR
+check = alt_infer == altntr
+abspid = tech_biom$ABSPID
+alt_check_df = data_frame(abspid, altntr, alt_infer, check)
+alt_check_df |> filter(check == FALSE) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where values in ALTNTR is different from the inferrence made based on ALTRESB')
+```
+
+-   According to the table above, there are 502 observations where `ALNTR` is different from what has been indicated directly by `ALTRESB`. These could be considered as cases where logical inconsistencies lie in the 2 variables of concern. In order to fix this inconsistency, the current `ALTNTR` values should be replaced with the inference made using `ALTRESB`
+
+### 3.3.5. APOBNTR and APOBRESB
+
+-   `APOBRESB` records the range of Apolipoprotein B in g/L
+
+-   `APOBNTR` gives information about the status of Apolipoprotein B *(ApoB)*
+
+-   As given by the data dictionary `dict_biom`,
+
+    -   Normal apolipoprotein B is defined as
+
+        -   $\le$ 1.3mmol/L for males
+
+        -   $\le$ 1.2mmol/L for females
+
+    -   Abnormal apolipoprotein B is defined as
+
+        -   $>$ 1.3mmol/L for males
+
+        -   $>$ 1.2mmol/L for females
+
+-   As a result, `APORESB` should be reflected by `APOBNTR`. The following process would infer the result of `APOBNTR` using `APORESB` and the normality/abnormality range defined above, and then compare it with what has been recorded in `tech_biom` to see if there is any logical inconsistencies
+
+```{r apob_check, warning = FALSE, message = FALSE}
+# inference
+apob_infer = vector(mode = 'character', length = dim(tech_biom)[1])
+for (i in 1:dim(tech_biom)[1]) {
+  sex = tech_biom$SEX[i]
+  apobresb = tech_biom$APOBRESB[i] |> as.character() |> as.numeric()
+  if (is.na(sex)) {
+    apob_infer[i] = NaN
+    next
+  }
+  if (is.na(apobresb)) {
+    apob_infer[i] = NaN
+    next
+  }
+  if (sex == '1') {
+    if (apobresb <= 7) {
+      apob_infer[i] = '1'
+    }
+    else{
+      apob_infer[i] = '2'
+    }
+  }
+  else{
+    if (apobresb <= 6) {
+      apob_infer[i] = '1'
+    }
+    else{
+      apob_infer[i] = '2'
+    }
+  }
+}
+# create a dataframe to express the check of apob inferred result vs. recorded
+apobntr = tech_biom$APOBNTR
+check = apob_infer == apobntr
+apob_check_df = data_frame(abspid, apobntr, apob_infer, check)
+apob_check_df |> filter(check == FALSE) |> datatable(options = list(scrollX = TRUE), caption = 'Observations when the result inferred from APOBRESB is different from the recorded APOBNTR')
+```
+
+-   Based on the table above, `APOBNTR` and `APOBRESB` appear to be completely consistent with each other
+
+### 3.3.6. CHOLNTR and CHOLRESB
+
+-   `CHOLRESB` records the range of one's total cholesterol in mmol/L
+
+-   `CHOLNTR` gives information about the status of the total cholesterol. As specified by `dict_biom`:
+
+    -   Normal total cholesterol is $<$ 5.5mmol/L
+
+    -   Abnormal total cholesterol is $\ge$ 5.5mmol/L
+
+-   Thus, as their definition suggests, `CHOLNTR` should correctly reflect the value stored in `CHOLRESB`
+
+```{r chol_check, warning = FALSE, message = FALSE}
+# infer
+chol_infer = vector(mode = 'character', length = dim(tech_biom)[1])
+for (i in 1:dim(tech_biom)[1]) {
+  chol = tech_biom$CHOLRESB[i] |> as.character() |> as.numeric()
+  if (is.na(chol)) {
+    chol_infer[i] = NaN
+    next
+  }
+  if (chol <= 4) {
+    chol_infer[i] = '1'
+  }
+  else{
+    chol_infer[i] = '2'
+  }
+}
+# compare
+cholntr = tech_biom$CHOLNTR
+chol_check = chol_infer == cholntr
+chol_check_df = data_frame(abspid, cholntr, chol_infer, chol_check)
+chol_check_df |> filter(chol_check == FALSE) |> datatable(caption = 'Observations where Cholesterol status inferred from CHOLRESB is different from what is recorded in CHOLNTR')
+```
+
+-   The emptiness of the table above indicates that none of the observed values from the inferred result and those stored in `CHOLNTR` are different. Thus, `CHOLRESB` and `CHOLNTR` are logically consistent
+
+### 3.3.7. DIAHBRSK vs. HBA1PREB
+
+-   `HBA1PREB` records the percentage range of HbA1c
+
+-   `DIAHBRSK` indicates the diabetes risk as suggested by HbA1c
+
+-   Thus, the results stored in `DIAHBRSK` should be consistent with that of `HBA1PREB`
+
+```{r hba1_check, warning = FALSE, message = FALSE}
+# infer
+hba1_infer = vector('character', length = dim(tech_biom)[1])
+for (i in 1:dim(tech_biom)[1]) {
+  hba1c = tech_biom$HBA1PREB[i] |> as.character() |> as.numeric()
+  if (is.na(hba1c) | hba1c == 7 | hba1c == 8) {
+    hba1_infer[i] = NaN
+    next
+  }
+  if (hba1c <= 3) {
+    hba1_infer[i] = '1'
+  }
+  else{
+    if(hba1c == 4) {
+      hba1_infer[i] = '2'
+    }
+    else {
+      hba1_infer[i] = '3'
+    }
+  }
+}
+# compare
+diahbrsk = tech_biom$DIAHBRSK
+hba1_check = diahbrsk == hba1_infer
+hba1_check_df = data_frame(abspid, diahbrsk, hba1_infer, hba1_check)
+hba1_check_df |> filter(hba1_check == FALSE) |> datatable(caption = 'Observations where the inferred and recorded values of DIAHBRSK are different', options = list(scrollX = TRUE))
+```
+
+-   The empty table above indicates that there is no difference between the inferred and the recorded results of `DIAHBRSK`. Hence, it can be concluded that `DIAHBRSK` and `HBA1PREB` are logically consistent
+
+### 3.3.8. GGTNTR vs. GGTRESB
+
+-   `GGTRESB` records the range of gamma glutamyl transferase *(GGT)* in U/L
+
+-   `GGTNTR` stores the status of GGT
+
+-   The status of GGT has to align closely with the amount of GGT. Hence, `GGTRESB` should be reflected by `GGTNTR`
+
+```{r ggt_check, warning = FALSE, message = FALSE}
+ggt_infer = vector(mode = 'character', length = dim(tech_biom)[1])
+for (i in 1:dim(tech_biom)[1]) {
+  ggtresb = tech_biom$GGTRESB[i] |> as.character() |> as.numeric()
+  age = tech_biom$AGEC[i] 
+  sex = tech_biom$SEX[i]
+  if (is.na(ggtresb)) {
+    ggt_infer[i] = NaN
+    next
+  }
+  if(is.na(age)) {
+    ggt_infer[i] = NaN
+    next
+  }
+  if (is.na(sex)) {
+    ggt_infer[i] = NaN
+    next
+  }
+  if (age < 12) {
+    ggt_infer[i] = NaN
+    next
+  }
+  if (age <= 14) {
+    if (ggtresb > 5) {
+      ggt_infer[i] = '2'
+    }
+    else{
+      ggt_infer[i] = '1'
+    }
+    next
+  }
+  if (sex == '2') {
+    if (ggtresb >= 7) {
+      ggt_infer[i] = '2'
+    }
+    else{
+      ggt_infer[i] = '1'
+    }
+  }
+  else{
+    if (age <= 17) {
+      if (ggtresb >= 8) {
+        ggt_infer[i] = '2'
+      }
+      else{
+        ggt_infer[i] = '1'
+      }
+    }
+    else{
+      if (ggtresb >= 10) {
+        ggt_infer[i] = '2'
+      }
+      else{
+        ggt_infer[i] = '1'
+      }
+    }
+  }
+}
+# compare
+ggtntr = tech_biom$GGTNTR
+ggt_check = ggtntr == ggt_infer
+ggt_check_df = data_frame(abspid, ggtntr, ggt_infer, ggt_check)
+ggt_check_df |> filter(ggt_check == FALSE) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where the inferred and recorded values of GGTNTR are different')
+```
+
+-   As indicated by the outputted table above, there is no observation where the inferred and recorded values of `GGTNTR` do not match with each other. Thus, it is evidence to conclude that the values of `GGTNTR` and `GGTRESB` are logically consistent.
+
+### 3.3.9. GLUCFPD vs. GLUCFREB
+
+-   `GLUCFPD` indicates the status of fasting plasma glucose status
+
+-   `GLUCFREB` stores the range of one's fasting plasma glucose in mmol/L
+
+-   As its definition suggests, `GLUCFPD` should be closely related to `GLUCFREB`. Therefore, in order to check their logical consistency, we would try to infer the status of fasting plasma glucose by its recorded range stored in `GLUCFREB`, and then compare it to what has already been given in `GLUCFPD`
+
+```{r gluc_check, warning = FALSE, message = FALSE}
+# infer
+gluc_infer = vector(mode = 'character', length = dim(tech_biom)[1])
+for (i in 1:dim(tech_biom)[1]) {
+  glucfreb = tech_biom$GLUCFREB[i] |> as.character() |> as.numeric()
+  if (is.na(glucfreb)) {
+    gluc_infer[i] = NaN
+    next
+  }
+  if (glucfreb <= 4) {
+    gluc_infer[i] = '1'
+  }
+  else{
+    if (glucfreb <=5) {
+      gluc_infer[i] = '2'
+    }
+    else{
+      gluc_infer[i] = '3'
+    }
+  }
+}
+# compare
+glucfpd = tech_biom$GLUCFPD
+gluc_check = glucfpd == gluc_infer
+gluc_check_df = data_frame(abspid, glucfpd, gluc_infer, gluc_check)
+gluc_check_df |> filter(gluc_check = FALSE) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where the inferred and recorded values of GLUCFPD are different')
+```
+
+-   The output of the code chunk above has clearly confirmed that there are no cases such that the inferred and recorded values of `GLUCFREB` are different from each other, and thus, complete consistency between `GLUCFREB` and `GLUCFPD`
+
+### 3.3.10. LDLNTR vs. LDLRESB
+
+-   `LDLNTR` indicates the status of fasting LDL cholesterol
+
+-   `LDLRESB` records the range that one's fasting LDL cholesterol lies in
+
+-   According to the definitions specified in `dict_biom`, these 2 variables should be closely align with each other. Hence, we might want to check the status of fasting LDL cholesterol based on the given value in `LDLRESB`, before confirming the logical consistency by comparing the recorded and the inferred versions of `LDLNTR`
+
+```{r ldl_check, warning = FALSE, message = FALSE}
+# infer
+ldl_infer = vector(mode = 'character', length = dim(tech_biom)[1])
+for (i in 1:dim(tech_biom)[1]) {
+  resb = tech_biom$LDLRESB[i] |> as.character() |> as.numeric()
+  if (is.na(resb)) {
+    ldl_infer[i] = NaN
+    next
+  }
+  if (resb <= 5) {
+    ldl_infer[i] = '1'
+  }
+  else{
+    ldl_infer[i] = '2'
+  }
+}
+# compare
+ldlntr = tech_biom$LDLNTR
+ldl_check = ldlntr == ldl_infer
+ldl_check_df = data_frame(abspid, ldlntr, ldl_infer, ldl_check)
+ldl_check_df |> filter(ldl_check == FALSE) |> datatable(options = list(scrollX = TRUE), caption = 'Observations whose inferred and recorded values of LDLNTR are different')
+```
+
+-   The empty table outputted by the code chunk above demonstrated that there are no such cases where the inferred and the recorded values of `LDLNTR` are different from each other. Since the inference was made solely using `LDLRESB`, we could hence conclude the logical consistency between these 2 variables
+
+### 3.3.11. TRIGNTR vs. TRIGRESB
+
+-   `TRIGNTR` indicates the status of fasting triglycerides
+
+-   `TRIGRESB` stores the range where one's fasting triglycerides lies in, measured in mmol/L
+
+-   As both of them are referring to participant's fasting triglycerides, they should necessarily gives out the same information. In other words, the status that is inferred from `TRIGRESB` should match exactly what is stored in `TRIGNTR`
+
+```{r trig_check, message = FALSE, warning = FALSE}
+# infer
+trig_infer = vector(mode = 'character', length = dim(tech_biom)[1])
+for (i in 1:dim(tech_biom)[1]) {
+  resb = tech_biom$TRIGRESB[i] |> as.character() |> as.numeric()
+  if (is.na(resb)) {
+    trig_infer[i] = NaN
+    next
+  }
+  if (resb <= 4) {
+    trig_infer[i] = '1'
+  }
+  else{
+    trig_infer[i] = '2'
+  }
+}
+# compare
+trigntr = tech_biom$TRIGNTR
+trig_check = trigntr == trig_infer
+trig_check_df = data_frame(abspid, trigntr, trig_infer, trig_check)
+trig_check_df |> filter(trig_check == FALSE) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where the inferred and recorded values of TRIGNTR are different')
+```
+
+-   The empty table above acts as an obvious indication of the complete consistency between `TRIGNTR` and `TRIGRESB`
+
+### 3.3.12. SMSBC
+
+-   `SMSBC` records the social marital status of all people over 15 years of age
+
+-   Hence, inconsistencies might appear where people under 15 years old register an non-empty value
+
+```{r marital_stat_check, warning = FALSE, message = FALSE}
+tech_biom |> filter(AGEC < 15) |> filter(!is.na(SMSBC)) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where people under 15 are recorded with a marital status')
+```
+
+-   As indicated by the table above, none of the U15-people have their marital status recorded in `tech_biom`, which suggests a logical consistent within the `SMSBC` variable
+
+### 3.3.13. FEMLSBC
+
+-   `FEMLSBC` stores the information about female life stages
+
+-   As specified in the extra details section of `dict_biom`, `FEMLSBC` would only be recorded for females aged 10 years and over
+
+-   Thus, the following code chunk would check to see if any observations go against this rule
+
+```{r female_stage_check, message = FALSE, warning = FALSE}
+tech_biom |> filter((SEX == '2' & AGEC < 10) | (SEX == '1')) |> filter(!is.na(FEMLSBC)) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where FEMLSBC is recorded for either male or uner-10-year-old female')
+```
+
+-   The output above has strongly confirmed that the values stored in `FEMLSBC` is logically consistent by itself
+
+### 3.3.14. ADTOTSE
+
+-   `ADTOTSE` stores the total minutes one spent sitting or lying down last week
+
+-   As the variable is measured by minutes per week, its values should not exceed $7(days/week) \times 24(hours/day) \times 60(minutes/hour) = 10080(minutes/week)$
+
+```{r adtotse_check, warning = FALSE, message = FALSE}
+tech_biom |> filter(ADTOTSE >= 10080) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where ADTOTSE exceed its upper bound')
+```
+
+-   Thus, the consistency of `ADTOTSE` has been fortified by the result above
+
+### 3.3.15. SLPTIME
+
+-   `SLPTIME` indicates one's sleep duration in minutes on the day prior to the interview
+
+-   Since `SLPTIME`'s measurement is taken as minutes on a day, it should not exceed the total number of minutes included within a day. Specifically, the upper bound of `SLPTIME` is $24(hours/day) \times 60(minutes/hour) = 1440(minutes/day)$
+
+```{r sleep_time_check, warning = FALSE, message = FALSE}
+tech_biom |> filter(SLPTIME >= 1440) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where SLPTIME exceeds its upper bound')
+```
+
+-   The above output has indicated that there exists no inconsistency in the `SLPTIME` variable of the `tech_biom` dataset
+
+### 3.3.16. SMKDAILY
+
+-   `SMKDAILY` records one's daily smoker status
+
+-   As specified by the corresponding `extra` column in `dict_biom`, this record should only be registered for people at the age of 15 or older. Hence, it should be an inconsistency if there are people under 15 with a recorded daily smoker status
+
+```{r smoker_status_check, message = FALSE, warning = FALSE}
+tech_biom |> filter(AGEC < 15) |> filter(!is.na(SMKDAILY)) |> datatable(options = list(scrollX = TRUE), caption = 'Observations where people under 15 are recorded with a daily smoker status')
+```
+
+-   However, as proven in the table above, there is no observation of such a case. Thus, it can safely be concluded that `SMKDAILY` appears to be logically consistent
+
+## 3.4. Variables with low variance or rare categories
+
+### 3.4.1. Variables with low variance
+
+-   The `nearZeroVar()` function in the `caret` package could be used to identify the variables with low variance
+
+```{r low_variance, warning = FALSE, message = FALSE}
+# only include numerical variable
+num_biom = tech_biom |> select_if(is.numeric)
+low_var = nearZeroVar(num_biom, saveMetrics = TRUE)
+low_var$freqRatio = low_var$freqRatio |> round(2)
+low_var$percentUnique = low_var$percentUnique |> as.character()
+low_var |> datatable(options = list(scrollX = TRUE), caption = 'Whether the numerical variables have a variance near 0')
+```
+
+-   According to the table calculated using `nearZerovar()`, none of the numerical variable in the given data set has a too-low variance
+
+### 3.4.2. Variables with rare categories
+
+-   For this section, we will only consider the categorical variable of `tech_biom`
+
+-   The following code chunk would explore the value frequency of each variables of interest, and check whether they have at lease a rare category. By convention, 'rarity' in this case is defined as categories taking up less than $\frac{1}{\text{number of categories}}$ of the total number of observations
+
+```{r rare_cat, warning = FALSE, message = FALSE}
+cat_var = tech_biom |> 
+  select(-one_of(colnames(num_biom))) |> 
+  select(-ABSPID)
+rare_cat = list()
+for (i in 1:dim(cat_var)[2]) {
+  col = cat_var[,i]
+  freq = table(col)
+  for (o in 1:length(freq)) {
+    if (freq[o] != 0 & freq[o] < (1/length(freq[freq != 0]))*dim(cat_var)[2]) {
+      cat('Frequecy Table for ', colnames(cat_var)[i])
+      print(table(col))
+      cat("--------------------------------------------------\n")
+      rare_cat = c(rare_cat, list(i))
+      next
+    }
+  }
+}
+rare_cat_cols = vector('character', length = length(rare_cat))
+for (i in 1:length(rare_cat)) {
+  rare_cat_cols[i] = colnames(cat_var)[rare_cat[[i]]]
+}
+```
+
+-   These printed frequency tables are of those regarded as of rare-category after the verification process. They include: `SMSBC_MISS`, `FEMLSBC_MISS`, `INCDEC_MISS`, `BDYMSQ04_MISS`, `DIETQ12_MISS`, `DIETQ14_MISS`, `DIETRDI_MISS`, `SABDYMS_MISS`, `SMKDAILY_MISS`, `SMKSTAT_MISS`, `ALTNTR_MISS`, `ALTRESB_MISS`, `APOBNTR_MISS`, `APOBRESB_MISS`, `B12RESB_MISS`, `BIORESPC_MISS`, `CHOLNTR_MISS`, `CHOLRESB_MISS`, `CVDMEDST_MISS`, `DIAHBRSK_MISS`, `FASTSTAD_MISS`, `FOLATREB_MISS`, `GGTNTR_MISS`, `GGTRESB_MISS`, `GLUCFPD_MISS`, `GLUCFREB_MISS`, `HBA1PREB_MISS`, `HDLCHREB_MISS`, `LDLNTR_MISS`, `LDLRESB_MISS`, `TRIGNTR_MISS`, and `TRIGRESB_MISS`
+
+-   Interestingly, all of such variables demonstrate the missingness of others within the dataset, and the dominated category is always registered to be 'observed'
+
+## 3.5. Variables where the data dictionary is not correct
+
+### 3.5.1. Non-answered value encoder
+
+-   According to `dict_biom`, many variables have non-answered value encoded as '0', '998', '999', etc., to represent the reason for omission in addition to its emptiness
+
+```{r na_encoder, warning = FALSE, message = FALSE}
+terms = c('not applicable', 'not taken', 'not determined', 'not stated', 'not known', 
+          'not obtained', 'not measured', 'not collected', 'not reported')
+pattern = paste(terms, collapse = '|')
+dict_biom[grepl(pattern, dict_biom$description, ignore.case = TRUE), ] |> 
+  datatable(options = list(scrollX = TRUE), caption = 'Non-answered value encoders for different variables according to dict_biom')
+```
+
+-   However, when we get to the real data stored in `tech_biom`, none of these non-answered encoders are actually utilized
+
+```{r tech_biom_na_encoder_check, message = FALSE, warning = FALSE}
+tech_biom |> filter(BMISC == 0 | BMISC == 98 | BMISC == 99 |
+                      SMSBC == '0' |
+                      FEMLSBC == '9' |
+                      PHDKGWBC == 0 | PHDKGWBC == 997 | PHDKGWBC == 998 | PHDKGWBC == 999 |
+                      PHDCMHBC == 0 | PHDCMHBC == 998 | PHDCMHBC == 999 |
+                      PHDCMWBC == 0 | PHDCMWBC == 998 | PHDCMWBC == 999 |
+                      SF2SA1QN == '0' | SF2SA1QN == '99' |
+                      INCDEC == '0' | INCDEC == '98' | INCDEC == '99' |
+                      ADTOTSE == 9996 | ADTOTSE == 9999 | 
+                      BDYMSQ04 == '0' | BDYMSQ04 == '6' |
+                      DIASTOL == 0 | DIASTOL == 998 | DIASTOL == 999 |
+                      DIETQ14 == '6' | DIETQ5 == '0' | DIETQ8 == '0'|
+                      DIETRDI == '0' | DIETRDI == '3' |
+                      SABDYMS == '0' | SABDYMS == '8' | SABDYMS == '9' |
+                      SLPTIME == 9998 | SLPTIME == 9999 |
+                      SMKDAILY == '0' | SMKSTAT == '0' |
+                      SYSTOL == 0 | SYSTOL == 998 | SYSTOL == 999 |
+                      ALTNTR == '0' | ALTNTR == '8' | 
+                      ALTRESB == '97' | ALTRESB == '98'|
+                      APOBNTR == '0' | APOBNTR == '8' |
+                      APOBRESB == '97' | APOBRESB == '98' |
+                      B12RESB == '97' | B12RESB == '98' |
+                      BIORESPC == '0' | CHOLNTR == '0' | CHOLNTR == '8' |
+                      CHOLRESB == '97' | CHOLRESB == '98' | 
+                      CVDMEDST == '0' | CVDMEDST == '8' |
+                      DIAHBRSK == '0' | DIAHBRSK == '8' |
+                      FASTSTAD == '0' | FOLATREB == '97' | FOLATREB == '98' |
+                      GGTNTR == '8' | GGTRESB == '97' | ggtresb == '98' | 
+                      GLUCFPD == '0' | GLUCFPD == '8' | 
+                      GLUCFREB == '97' | GLUCFREB == '98' |
+                      HBA1PREB == '7' | HBA1PREB == '8' |
+                      HDLCHREB == '7' | HDLCHREB == '8' | 
+                      LDLNTR == '0' | LDLNTR == '8' |
+                      LDLRESB == '97' | LDLRESB == '98' |
+                      TRIGNTR == '0' | TRIGNTR == '8' |
+                      TRIGRESB == '97' | TRIGRESB == '98') |> 
+  datatable(options = list(scrollX = TRUE), caption = 'Observations with NA values encoded as specified above by dict_biom')
+```
+
+-   The above output shows that none of the non-answered values are actually encoded as indicated by `dict_biom`, which clearly is an inconsistency between the real data and its dictionary
+
+### 3.5.2. Non-existent variable in the real dataset
+
+-   As specified by `dict_biom`, there is a variable called `ABSHID` storing the Australian Bureau Statistics Household Identification number
+
+```{r abshid_in_dict_biom, warning = FALSE, message = FALSE}
+dict_biom |> filter(variable_name == 'ABSHID') |> datatable(options = list(scrollX = TRUE), caption = 'ABSHID described by dict_biom')
+```
+
+-   However, we could clearly see that `tech_biom` does not have any column with such a name, as proven by the code chunk below
+
+```{r abshid_in_tech_biom, warning = FALSE, message = FALSE}
+paste('ABSHID a variable in tech_biom, TRUE or FALSE? ', 'ABSHID'%in%colnames(tech_biom))
+```
+
+### 3.5.3. Variables not included in data dictionary
+
+-   There are also some variables which exist in `tech_biom`, but not described in `dict_biom`. The particular list of such variables would be provided with the code chunk below
+
+```{r var_not_in_dict, warning = FALSE, message = FALSE}
+cols = colnames(tech_biom)
+cols[!cols%in%dict_biom$variable_name] |> data_frame() |> datatable(options = list(scrollX = TRUE), caption = 'Variables not included in dict_biom', colnames = 'variable_name')
+```
+
+-   As represented by the data table above, there are 40 variables appearing in `tech_biom` but not specified by `dict_biom`. Although their names are fairly intuitive so that they could be understood immediately without referring to the data dictionary. Nevertheless, it is still considered as an inconsistency between `dict_biom` and `tech_biom`
+
+# 4. Missing values
+
+## 4.1. Patterns of missingness
+
+-   As analyzed in section **3.3** about the logical consistency of `tech_biom`, some of the variables are actually an inference of other corresponding variables. Therefore, we could regard them as 1 variable when looking for the patterns of missingness in the dataset. These pair of variables include:
+
+    -   LDLRESB and LDLNTR
+
+    -   TRIGRESB and TRIGNTR
+
+    -   GLUCFREB and GLUCFPD
+
+    -   HBA1PREB and DIAHBRSK
+
+    -   GGTRESB and GGTNTR
+
+    -   ALTRESB and ALTNTR
+
+    -   APOBRESB and APOBNTR
+
+    -   CHOLRESB and CHOLNTR
+
+-   In order to investigate the patterns of missingness, we would start by visualizing the amount of missing data in each (relatively independent) variables
+
+```{r missingness_visual_1, warning = FALSE, message = FALSE}
+tech_biom_with_nas = tech_biom |> subset(select = c(-LDLNTR, -TRIGNTR, -GLUCFPD, -DIAHBRSK, -GGTNTR, -ALTNTR, -APOBNTR, -CHOLNTR))
+tech_biom_with_nas = tech_biom_with_nas |> select_if(~any(is.na(.)))
+gg_miss_var(tech_biom_with_nas) |> ggplotly() |> layout(title = 'The amount of missing data in tech_biom')
+```
+
+-   Looking at the illustration above, it is notable that some variables have the same number of missing values. Thus, we might want to explore to see whether their missing values are actually registered by the same participants. In particular, they are:
+
+    -   GGTRESB and ALTRESB
+
+        ```{r na_ggt_alt, warning = FALSE, message = FALSE}
+        id_ggt_missing = filter(tech_biom, is.na(GGTRESB))$ABSPID
+        id_alt_missing = filter(tech_biom, is.na(ALTRESB))$ABSPID
+        ggt_alt_missing = id_ggt_missing == id_alt_missing
+        paste('There are ',ggt_alt_missing[ggt_alt_missing == FALSE] |> length(),' observations where missing value is only observed in either GGT or ALT')
+        ```
+
+    -   HDLCHREB, FOLATREB, CHOLRESB, and B12RESB
+
+        ```{r na_hdl_folat_chol_b12, warning = FALSE, message = FALSE}
+        id_hdl_missing = filter(tech_biom, is.na(HDLCHREB))$ABSPID
+        id_folat_missing = filter(tech_biom, is.na(FOLATREB))$ABSPID
+        id_chol_missing = filter(tech_biom, is.na(CHOLRESB))$ABSPID
+        id_b12_missing = filter(tech_biom, is.na(B12RESB))$ABSPID
+        hdl_folta_chol_b12 = id_hdl_missing == id_folat_missing &
+          id_folat_missing == id_chol_missing &
+          id_chol_missing == id_b12_missing &
+          id_b12_missing == id_hdl_missing
+        paste('There are ',hdl_folta_chol_b12[hdl_folta_chol_b12 == FALSE] |> length(),' observations where missing value is only observed in either HDL cholesterol, folate, total cholesterol, or vitamin B12')
+        ```
+
+    -   SYSTOL and DIASTOL
+
+        ```{r na_sys_dias, warning = FALSE, message = FALSE}
+        id_systol_missing = filter(tech_biom, is.na(SYSTOL))$ABSPID
+        id_dias_missing = filter(tech_biom, is.na(DIASTOL))$ABSPID
+        sys_dias = id_systol_missing == id_dias_missing
+        paste('There are ',sys_dias[sys_dias == FALSE] |> length(),' observations where missing value is only observed in either systolic blood pressure or diastolic blood pressure')
+        ```
+
+    -   SMSBC, SMKSTAT, and SMKDAILY
+
+        ```{r na_smoking, warning = FALSE, message = FALSE}
+        id_sbc_missing = filter(tech_biom, is.na(SMSBC))$ABSPID
+        id_stat_missing = filter(tech_biom, is.na(SMKSTAT))$ABSPID
+        id_daily_missing = filter(tech_biom, is.na(SMKDAILY))$ABSPID
+        smoking_missing = id_sbc_missing == id_stat_missing &
+          id_stat_missing == id_daily_missing &
+          id_daily_missing == id_sbc_missing
+        paste('There are ',smoking_missing[smoking_missing == FALSE] |> length(),' observations where missing value is only observed in either smoker status, smoker daily status, or social marital status')
+        ```
+
+-   According to the code chunks, it is evident that these set of variables have a similar missing pattern. Hence, in analyzing the missingness tendency for `tech_biom`, we can, as earlier, consider each set as 1 variable only
+
+```{r combining_similar_missingness, warning = FALSE, message = FALSE}
+tech_biom_with_nas = tech_biom_with_nas |> 
+  subset(select = c(-ALTRESB, -HDLCHREB, -FOLATREB, -B12RESB, -DIASTOL, -SMKSTAT, -SMKDAILY))
+```
+
+```{r miss_visual_2, warning = FALSE, message = FALSE}
+vis_miss(tech_biom_with_nas, cluster = TRUE)
+grid.text("Missingness pattern visualization 1",x = 0.5, y=0.95, gp=gpar(fontsize=15))
+```
+
+-   According to the visualization produced by the code chunk above, 38.7% of the values are recorded as missing, which is considered to be a large proportion. Within that, missing values of ApoB *(APOBRESB)*, total cholesterol *(CHOLRESB)*, dyslipidaemia *(CVDMEDST),* fasting status *(FASTSTAD)*, GGT *(GGTRESB)*, fasting plasma glucose *(GLUCFREB)*, HbA1c status *(HBA1PREB),* fasting LDL cholesterol *(LDLRESB)*, and fasting triglycerids *(TRIGRESB)* appear simultaneously, which can be a noteworthy pattern of emptiness. A similar non-answered pattern could also be observed between BMISC, PHDKGWBC, PHDCMHBC, and PHDCMWBC
+
+```{r miss_visual_3, fig.height = 8, warning = FALSE, message = FALSE}
+gg_miss_upset(tech_biom_with_nas, nsets = n_var_miss(tech_biom_with_nas))
+grid.text("Missingness pattern visualization 2",x = 0.65, y=0.95, gp=gpar(fontsize=15))
+```
+
+-   The above illustration has fortified our earlier argument by specifying the number of intersections between non-answered variables. As can be observed, the aforementioned combinations of missing variables almost always appear together as a set within a large number of observations, and thus, we could regard these as a general pattern of missingness in `tech_biom`.
+
+## 4.2. Summary of missingness statistics
+
+```{r missing_summary, message = FALSE, warning = FALSE}
+kable(miss_var_summary(tech_biom), digits = 2, format = 'html', caption = 'Summary of missingness statistics for tech_biom')
+```
+
+# 5. Complete dataset
+
+-   In order to transform the current technically correct data into its complete version, some operations done in the following code chunk include:
+
+    -   Getting rid of categorical variables with rare categories *(which are specified earlier in section 3.4.1)*, as their classification rarely provides any helpful information. Some categories are registered for a relatively high proportion of participants, which leaves their counterparts with only a few places to fill in. The dominance of the former in population, thus, would eventually lead to a useless classification
+
+    -   Excluding all other variables ending with `_MISSING`. Exploring the reason for missingness of the observations might be an interesting topic. However, `tech_biom` is not really suitable for such an aim, because these `_MISSING` variables is not reflective of their corresponding partner *(i.e. `_MISSING` is stated as 'observed', but the observation is stored as `NA`)*. This also leads to the unbalanced ratio within these features, and hence, being fruitless in classification, should missing reasons be the research term.
+
+    -   Imputing the appropriate value where `NA`s are reasonable. For some variables, records were only taken for those who satisfied some specific conditions *(for example,* `FEMLSBS`, *which stores female life stage, could only be observed, and hence recorded, in female at and over 10 years old, as defined in `dict_biom`)*. Hence, we could neither use imputation methods or get rid of the missing values as a whole, since such behavior would completely exclude different groups of people from the dataset *(returning back to our previous example, we could not impute a value indicating female life stage for a male participant, and nor could we exclude all males within our data just because they do not have 'female life stage') .* As a result, in observations where the conditions of a variable are not met, we would replace `NA` with a value indicating 'not applicable', as given in the detailed information of the corresponding variable in `dict_biom`. Nevertheless, these would only be operated on categorical variables, as numerical encoder for 'not applicable' might easily be mistaken with a number value in quantitative ones.
+
+    -   Removing the rows where more than 50% of its records are missing values. Since more than half of the registered values are omitted, hardly could these observations provide any meaningful information about themselves, even when imputation is made.
+
+    -   Imputing reasonable values to some missing values. I have tried doing the imputation with K nearest neighbors under the assumption that people with similar observations in other non-empty fields would have the same performance in the non-given area. Nevertheless, this method takes too long to operate on R *(possibly up to half an hour)*. Hence, given that none of the ages and genders of participants are empty, I made another assumption that people at the same age and with the same sex would roughly have the same indexes on other fields. Because of this, `NA`s are replaced with the mean of values taken from same age and same sex people if is is numerical, and the mode of those people's indexes otherwise.
+
+    -   Removing all rows whose values are still missing, as it might be challenging to impute these `NA`s with something justifiable. Most often, the removed observations are those whose values are missing in general, so we could hardly find any similar participant to operate imputation. After the removal, we could notice that the dataset has gotten rid of observations from children from 2-4 years old. Therefore, we might want to limit any study using this dataset to grown-ups *(particularly from 18 and over)*
+
+```{r complete_data, message = FALSE, warning = FALSE}
+# getting rid of columns with rare categories
+clean = tech_biom |> 
+  select(-one_of(rare_cat_cols))
+
+# remove columns acting as an indicator for missingness
+clean = clean |> 
+  select(-c(SYSTOL_MISS, DIASTOL_MISS,ADTOTSE_MISS,PHDCMWBC_MISS,PHDCMHBC_MISS,
+            PHDKGWBC_MISS,BMISC_MISS, TRIGRESB, TRIGNTR, LDLRESB, LDLNTR, GLUCFREB, GLUCFPD))
+obs_with_low_nas = tech_biom |> filter(ABSPID%in%clean$ABSPID)
+
+# replace NAs with 'not applicable' encoder for some categorical variables
+# smsbc
+for(i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$SMSBC_MISS[i] == 'not applicable') {
+    clean$SMSBC[i] = '0'
+    next
+  }
+  if (clean$AGEC[i] < 15) {
+    clean$SMSBC[i] = '0'
+    next
+  }
+}
+
+# femlsbc
+for (i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$FEMLSBC_MISS[i] == 'not applicable') {
+    clean$FEMLSBC[i] = '9'
+    next
+  }
+  if (clean$SEX[i] == '1') {
+    clean$FEMLSBC[i] = '9'
+    next
+  }
+  if (clean$AGEC[i] < 10) {
+    clean$FEMLSBC[i] = '9' 
+    next
+  }
+}
+
+# incdec
+for (i in 1:dim(clean)[1]){
+  if (obs_with_low_nas$INCDEC_MISS[i] == 'not known') {
+    clean$INCDEC[i] = '99'
+  }
+}
+
+# bdymsq04
+for (i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$BDYMSQ04_MISS[i] == 'not applicable') {
+    clean$BDYMSQ04[i] = '0'
+  }
+}
+
+# dietq12
+for (i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$DIETQ12_MISS[i] == 'not used') {
+    clean$DIETQ12[i] = '5'
+  }
+}
+
+# dietq14
+for (i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$DIETQ14_MISS[i] == 'not used') {
+    clean$DIETQ14[i] = '5'
+  }
+}
+
+# dietrdi
+clean$DIETRDI = diet_status
+clean$DIETRDI = as.factor(clean$DIETRDI)
+
+# sabdyms
+for (i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$SABDYMS_MISS[i] == 'not collected') {
+    clean$SABDYMS[i] = '8'
+  }
+}
+
+# smkdaily
+for (i in 1:dim(clean)[1]){
+  if (obs_with_low_nas$SMKDAILY_MISS[i] == 'not applicable') {
+    clean$SMKDAILY[i] = '0'
+    next
+  }
+  if (clean$AGEC[i] < 15) {
+    clean$SMKDAILY[i] = '0'
+  }
+}
+
+# smkstat
+for (i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$SMKSTAT_MISS[i] == 'not applicable') {
+    clean$SMKSTAT[i] = '0'
+  }
+}
+
+# altntr
+for (i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$ALTNTR_MISS[i] == 'not applicable') {
+    clean$ALTNTR[i] = '0'
+    next
+  }
+  if (clean$AGEC[i] < 12) {
+    clean$ALTNTR[i] = '0'
+  }
+}
+
+# altresb
+for (i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$ALTRESB_MISS[i] == 'not applicable') {
+    clean$ALTRESB[i] = '97'
+  }
+}
+
+# apobntr
+for (i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$APOBNTR_MISS[i] == 'not applicable') {
+    clean$APOBNTR[i] = '0'
+  }
+}
+
+# apobresb
+for (i in 1:dim(clean)[1]) {
+  if (obs_with_low_nas$APOBRESB_MISS[i] == 'not applicable') {
+    clean$APOBRESB[i] = '97'
+  }
+}
+
+# cvdmedst
+for (i in 1:dim(clean)[1]) {
+  if (clean$AGEC[i] < 18 | clean$BIORESPC[i] == '1' | (!is.na(clean$FASTSTAD[i]) & clean$FASTSTAD[i] == '2')) {
+    clean$CVDMEDST[i] = '0'
+  }
+}
+
+# remove rows with 50% being NAs
+clean = clean |> 
+  filter(rowMeans(across(everything(),is.na)) <= 0.5)
+
+# imputation
+for (row in 1:dim(clean)[1]) {
+  age = clean$AGEC[row]
+  sex = clean$SEX[row]
+  for (col in 1:dim(clean)[2]) {
+    if (is.na(clean[row, col])) {
+      impute = clean |> 
+        filter(AGEC == age & SEX == sex)
+      if (is.numeric(clean[,col])) {
+        impute = mean(impute[,col], na.rm = TRUE)
+        clean[row, col] = impute
+      }
+      else{
+        freq_table = table(impute[,col])
+        impute = names(freq_table)[which.max(freq_table)]
+        clean[row, col] = impute
+      }
+    }
+  }
+}
+
+# get rid of missing values
+clean = clean |> drop_na()
+clean |> datatable(options = list(scrollX = TRUE), caption = 'Complete version of tech_biom')
+```
+
+# 6. Research questions
+
+## 6.1. Research question 1
+
+-   **Research question**: How does diet impact systolic and diastolic blood pressure levels?
+
+-   **Response variable**:
+
+    -   `SYSTOL`: systolic blood pressure (mmHg) - numerical variable
+
+    -   `DIASTOL`: diastolic blood pressure (mmHg) - numerical variable
+
+-   **Covariate variables:**
+
+    -   `DIETQ5`: usual daily serves of vegetables
+
+    -   `DIETQ8`: usual daily serves of fruits
+
+    -   `DIETQ12`: how often salt is used
+
+    -   `DIETQ14`: how often is salt added to food at table
+
+    -   `DIETRDI`: whether vegetable and fruit consumption met recommended dietary guidelines
+
+## 6.2. Research question 2
+
+-   **Research question 2:** Is there any relationship between apoliporprotein B *(ApoB)* levels and triglycerides?
+
+-   **Response variables**: apolipoprotein B range (`APOBRESB`)
+
+```{r apobresb_freq, message = FALSE, warning = FALSE}
+table(clean$APOBRESB) |> pander::pander(caption = 'Proportion of each class in APOBRESB')
+```
+
+According to the frequency table above, only class of 97 has a low proportion of observations in this variable. Hence, in order to conduct this research question, we might consider getting rid of that value.
+
+-   **Covariate variables**:
+
+    -   `TRIGNTR`: fasting triglycerides status
+
+    -   `FASTSTAD`: fasting status
+
+    -   `AGEC`
+
+    -   `SEX`
+
+## 6.3. Research question 3
+
+-   **Research question**: What is the effect of physical activity on body mass index and systolic blood pressure
+
+-   **Response variable:**
+
+    -   `BMISC` : body mass index - BMI *(numerical)*
+
+    -   `SYSTOL`: systolic blood pressure *(numerical)*
+
+-   **Covariate variables**:
+
+    -   `EXLWTBC`
+
+    -   `EXLWMBC`
+
+    -   `SEX`
+
+    -   `AGEC`
+
+## 6.4. Research question 4
+
+-   **Research question**: What is the relationship between age and fasting plasma glucose levels and cholesterol levels?
+
+-   **Response variable**:
+
+    -   `GLUCFREB`
+
+    ```{r warning = FALSE,message = FALSE}
+    table(clean$GLUCFREB) |> pander::pander(caption = 'Proportion of each class in GLUCFREB')
+    ```
+
+    -   `CHOLRESB`
+
+    ```{r warning = FALSE,message = FALSE}
+    table(clean$CHOLRESB) |> pander::pander(caption = 'Proportion of each class in CHOLRESB')
+    ```
+
+-   **Covariate variables:**
+
+    -   `AGEC`
+
+    -   `SEX`
+
+# 7. Clean version of data
+
+```{r clean_saved, message = FALSE, warning = FALSE}
+save(clean_biom = clean, dict_biom, types_biom, file = "clean_data.Rdata")
+```
+
+# 8. Reference
+
+OpenAI. (2024). *ChatGPT* (Mar 14 version) [Large language model]. [https://chat.openai.com/chat](#0)
+
+Ohmerod, J. (2024). *Disclipinary Assignment 1 specification*.
