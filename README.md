@@ -1,29 +1,52 @@
-## 🧬 Kidney Transplant Damage Prediction Using Gene Expression Data  
-**Datasets: GSE57387 (biopsy) & GSE46474 (blood)**
+# 🎓 University Assignments Showcase
 
-This project explores the use of gene expression data to understand and predict kidney transplant outcomes, using two publicly available clinical datasets. It demonstrates my ability to work across the full data science pipeline—from raw biomedical data to actionable insights for healthcare applications.
-
----
-
-### 🔍 Part 1 – Biopsy-Based Analysis (GSE57387)
-- Performed **differential expression analysis** to identify genes associated with graft damage at 3 and 12 months post-transplant (CADI scores).
-- Applied **moderated t-tests using limma**, and used **data filtering, log-transformation, and normalization** to ensure robust comparisons.
-- Designed **visual summaries** to compare early and late damage signals, helping clinicians understand gene-level drivers of long-term rejection.
-
-### 🧪 Part 2 – Blood-Based Classification (GSE46474)
-- Built predictive models (Random Forest, SVM, Logistic Regression) using blood gene expression to classify kidney transplant damage.
-- Evaluated models using **nested cross-validation** and metrics like AUC to ensure reliable performance.
-- Compared models using CADI-3 and CADI-12 as targets, and recommended the most stable and informative response variable for clinical use.
+Welcome! This repository is a curated collection of assignments, reports, and projects completed throughout my undergraduate studies in Data Science and Finance. It is designed to demonstrate my technical proficiency, analytical thinking, and collaborative capabilities across a variety of interdisciplinary topics.
 
 ---
 
-### 💡 Skills Demonstrated
-- **Bioinformatics:** Preprocessing and analyzing high-dimensional gene expression data  
-- **Machine Learning:** Model development, hyperparameter tuning, and performance evaluation  
-- **Clinical Insight:** Translating data analysis into meaningful interpretations for domain experts  
-- **Reproducible Science:** Scripted workflows in R using `limma`, `caret`, `ggplot2`, and `tidyverse`  
-- **Communication:** Designed clear, interpretable visualizations to support clinical decision-making
+## 🧠 What I've Learned
+
+Throughout my studies, I've developed skills and knowledge in:
+
+- **Programming & Software Development**  
+  Writing efficient and scalable code using Python, R, and Java. Applying object-oriented principles and software engineering best practices.
+
+- **Data Science & Machine Learning**  
+  Exploratory data analysis, supervised and unsupervised learning, model evaluation, and statistical inference using real-world datasets.
+
+- **Big Data & Database Systems**  
+  Working with large, complex datasets using SQL and cloud-based tools. Gaining experience in data pipelines, data wrangling, and NoSQL systems.
+
+- **Mathematics & Statistics**  
+  Mastery of linear algebra, calculus, and probability theory. Applying statistical models, generalized linear models, and inferential statistics to data problems.
+
+- **Finance & Economics**  
+  Understanding corporate finance, investment evaluation, and financial decision-making. Applying theoretical knowledge to practical business scenarios.
+
+- **Communication & Critical Thinking**  
+  Writing clear reports, interpreting complex results, and creating visualizations that effectively communicate insights to diverse audiences.
 
 ---
 
-> This project highlights my ability to apply data science in a healthcare setting—solving real-world problems with technical rigor, domain awareness, and a focus on actionable outcomes.
+## 🧩 Highlights
+
+- **Capstone Projects:** Tackled real-world business challenges using data science tools and methodologies.
+- **Team Collaboration:** Collaborated with peers via GitHub to manage version control and contributions on group assignments.
+- **Ethics in AI and Data:** Gained awareness of ethical considerations and societal impacts of machine learning and AI systems.
+
+---
+
+## 📁 Repository Structure
+
+Each branch contains a different assignment or project, categorized by topic or unit. The documentation inside each folder provides context, methodology, and reflection.
+
+---
+
+## 🚀 How to Use
+
+Feel free to explore the repository to get a sense of my academic and technical journey. If you're a recruiter, employer, or collaborator, I’d be happy to walk you through any of the work or discuss how these skills translate into professional settings.
+
+---
+
+Thank you for visiting!
+
