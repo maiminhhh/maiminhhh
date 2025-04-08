@@ -51,8 +51,6 @@
 
 The following diagram illustrates the relationships between datasets used in this analysis:
 
-![Database Diagram](dbdiagram.png)
-
 ## 🔢 **Score Analysis**
 
 ### 📝 **Score Formula**:
