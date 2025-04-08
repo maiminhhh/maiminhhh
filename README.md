@@ -1,12 +1,34 @@
-🎓 University Projects & Coursework Portfolio
-Welcome to my GitHub! This repository serves as a collection of my academic work during my time at university. It includes projects, assignments, and personal explorations across data science, finance, programming, and machine learning.
-You'll find code and documentation related to:
+# 🏰 Tower Defense Game — A Strategy Game in Java 🎮  
+*University of Sydney – Object-Oriented Programming*  
+*Assignment – Semester 2, 2023*  
+*Java + Processing + Gradle*
 
-- Data analysis & visualization (R, Python, tidyverse, ggplot2, pandas, matplotlib)
-- Machine learning models and experiments (scikit-learn, TensorFlow, CNNs)
-- Statistical modeling & simulations
-- Algorithms and data structures
-- Financial analysis & forecasting models
-- Capstone and group project collaborations
+---
 
-Each branch contains a brief README to explain the objective, methodology, and key learnings. This portfolio reflects my progression, curiosity, and problem-solving skills throughout my degree.
+## Overview  
+A fun and interactive **Tower Defense** game built in **Java**, utilizing the **Processing library** for rendering. Protect the wizard’s house by placing towers along enemy paths. Each wave of enemies gets progressively harder, and you must strategically manage your resources to survive.
+
+---
+
+## Features  
+- **Wave-Based Gameplay**: Defend against waves of enemies trying to reach the wizard’s house.
+- **Tower Construction and Upgrades**: Build towers on available spaces, and upgrade them to improve range, speed, and damage.
+- **Fireball Mechanism**: Towers shoot fireballs that damage enemies within range.
+- **Mana System**: Spend mana to place towers and banish enemies that reach the house.
+- **Game Speed Control**: Pause or fast-forward the game for better control over the action.
+- **Winning and Losing Conditions**: Win by defeating all waves, or lose if monsters deplete your mana reserves.
+
+---
+
+## Extension: Auto-Round Generation  
+- **New Round Auto-Generation**: The game automatically generates new rounds of enemies after each wave ends, ensuring continuous gameplay without manual initiation.
+
+---
+
+## Installation  
+1. **Clone or download** the repository.
+2. Ensure you have **Java 8** and **Gradle** installed.
+3. Run the game with:
+   ```bash
+   gradle run
+
