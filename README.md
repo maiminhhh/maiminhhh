@@ -1,4 +1,4 @@
-🎓 University Projects & Coursework Portfolio
+## 🎓 University Projects & Coursework Portfolio
 Welcome to my GitHub! This repository serves as a collection of my academic work during my time at university. It includes projects, assignments, and personal explorations across data science, finance, programming, and machine learning.
 You'll find code and documentation related to:
 
