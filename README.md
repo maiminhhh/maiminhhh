@@ -1,12 +1,29 @@
-# 🎓 University Projects & Coursework Portfolio
-Welcome to my GitHub! This repository serves as a collection of my academic work during my time at university. It includes projects, assignments, and personal explorations across data science, finance, programming, and machine learning.
-You'll find code and documentation related to:
+## 🧬 Kidney Transplant Damage Prediction Using Gene Expression Data  
+**Datasets: GSE57387 (biopsy) & GSE46474 (blood)**
 
-- Data analysis & visualization (R, Python, tidyverse, ggplot2, pandas, matplotlib)
-- Machine learning models and experiments (scikit-learn, TensorFlow, CNNs)
-- Statistical modeling & simulations
-- Algorithms and data structures
-- Financial analysis & forecasting models
-- Capstone and group project collaborations
+This project explores the use of gene expression data to understand and predict kidney transplant outcomes, using two publicly available clinical datasets. It demonstrates my ability to work across the full data science pipeline—from raw biomedical data to actionable insights for healthcare applications.
 
-Each branch contains a brief README to explain the objective, methodology, and key learnings. This portfolio reflects my progression, curiosity, and problem-solving skills throughout my degree.
+---
+
+### 🔍 Part 1 – Biopsy-Based Analysis (GSE57387)
+- Performed **differential expression analysis** to identify genes associated with graft damage at 3 and 12 months post-transplant (CADI scores).
+- Applied **moderated t-tests using limma**, and used **data filtering, log-transformation, and normalization** to ensure robust comparisons.
+- Designed **visual summaries** to compare early and late damage signals, helping clinicians understand gene-level drivers of long-term rejection.
+
+### 🧪 Part 2 – Blood-Based Classification (GSE46474)
+- Built predictive models (Random Forest, SVM, Logistic Regression) using blood gene expression to classify kidney transplant damage.
+- Evaluated models using **nested cross-validation** and metrics like AUC to ensure reliable performance.
+- Compared models using CADI-3 and CADI-12 as targets, and recommended the most stable and informative response variable for clinical use.
+
+---
+
+### 💡 Skills Demonstrated
+- **Bioinformatics:** Preprocessing and analyzing high-dimensional gene expression data  
+- **Machine Learning:** Model development, hyperparameter tuning, and performance evaluation  
+- **Clinical Insight:** Translating data analysis into meaningful interpretations for domain experts  
+- **Reproducible Science:** Scripted workflows in R using `limma`, `caret`, `ggplot2`, and `tidyverse`  
+- **Communication:** Designed clear, interpretable visualizations to support clinical decision-making
+
+---
+
+> This project highlights my ability to apply data science in a healthcare setting—solving real-world problems with technical rigor, domain awareness, and a focus on actionable outcomes.
