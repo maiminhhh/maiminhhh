@@ -9,4 +9,4 @@ You'll find code and documentation related to:
 - Algorithms and data structures
 - Capstone and group project collaborations
 
-Each repository contains a brief README to explain the objective, methodology, and key learnings. This portfolio reflects my progression, curiosity, and problem-solving skills throughout my degree.
+Each branch contains a brief README to explain the objective, methodology, and key learnings. This portfolio reflects my progression, curiosity, and problem-solving skills throughout my degree.
