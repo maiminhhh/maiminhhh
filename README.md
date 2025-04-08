@@ -1,7 +1,5 @@
 # 📊 Project: Analysis of Bustling Regions in Greater Sydney
 
-![Project Logo](https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Logo_of_the_University_of_Sydney.svg/120px-Logo_of_the_University_of_Sydney.svg.png)
-
 ## 📍 Dataset Description
 
 ### 🚏 **SA2 Regions**
