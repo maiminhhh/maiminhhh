@@ -38,7 +38,7 @@ Throughout my studies, I've developed skills and knowledge in:
 
 ## 📁 Repository Structure
 
-Each branch contains a different assignment or project, categorized by topic or unit. The documentation inside each folder provides context, methodology, and reflection.
+Each repository contains a different assignment or project, categorized by topic or unit. The documentation inside each folder provides context, methodology, and reflection.
 
 ---
 
