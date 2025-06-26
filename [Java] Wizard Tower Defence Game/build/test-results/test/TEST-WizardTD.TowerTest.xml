@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="WizardTD.TowerTest" tests="21" skipped="0" failures="0" errors="0" timestamp="2025-04-23T17:54:26" hostname="maiminhhh.shared.sydney.edu.au" time="0.018">
+  <properties/>
+  <testcase name="testUpgradeSpeedHighLevel()" classname="WizardTD.TowerTest" time="0.0"/>
+  <testcase name="testUpgradeDamageAllLvIncrease()" classname="WizardTD.TowerTest" time="0.0"/>
+  <testcase name="testUpgradeRangeAllLvEquals3()" classname="WizardTD.TowerTest" time="0.001"/>
+  <testcase name="testGenerateFireBallsNoneFireBalls()" classname="WizardTD.TowerTest" time="0.001"/>
+  <testcase name="testUpgradeSpeedAllLvIncrease()" classname="WizardTD.TowerTest" time="0.001"/>
+  <testcase name="testSetEnemiesInRangeNullSprite()" classname="WizardTD.TowerTest" time="0.001"/>
+  <testcase name="testUpgradeRangeAllLvIncrease()" classname="WizardTD.TowerTest" time="0.0"/>
+  <testcase name="testGenerateFireBallWithElementsInFireBalls()" classname="WizardTD.TowerTest" time="0.0"/>
+  <testcase name="testSetSpriteLv0()" classname="WizardTD.TowerTest" time="0.0"/>
+  <testcase name="testSetSpriteLv1()" classname="WizardTD.TowerTest" time="0.0"/>
+  <testcase name="testSetSpriteLv2()" classname="WizardTD.TowerTest" time="0.001"/>
+  <testcase name="testSetSpriteLv3()" classname="WizardTD.TowerTest" time="0.001"/>
+  <testcase name="testSetEnemiesInRangeNullMonstersList()" classname="WizardTD.TowerTest" time="0.0"/>
+  <testcase name="testGenerateFireBallsNoEnemiesInRange()" classname="WizardTD.TowerTest" time="0.0"/>
+  <testcase name="testUpgradeRangeHighLevel()" classname="WizardTD.TowerTest" time="0.0"/>
+  <testcase name="testUpgradeDamageAllLvEquals3()" classname="WizardTD.TowerTest" time="0.001"/>
+  <testcase name="testUpgradeDamageHighLevel()" classname="WizardTD.TowerTest" time="0.001"/>
+  <testcase name="testUpgradeRangeAllLvExceeds3()" classname="WizardTD.TowerTest" time="0.001"/>
+  <testcase name="testGenerateFireBallBadTiming()" classname="WizardTD.TowerTest" time="0.001"/>
+  <testcase name="testUpgradeSpeedAllLvEquals3()" classname="WizardTD.TowerTest" time="0.0"/>
+  <testcase name="testSetEnemiesInRangeFarAwayMonsters()" classname="WizardTD.TowerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

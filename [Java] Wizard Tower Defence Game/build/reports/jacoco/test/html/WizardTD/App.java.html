@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">scaffold</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONArray;
+import processing.data.JSONObject;
+import processing.event.MouseEvent;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.util.*;
+
+public class App extends PApplet {
+
+    public static final int CELLSIZE = 32;
+    public static final int SIDEBAR = 120;
+    public static final int TOPBAR = 40;
+    public static final int BOARD_WIDTH = 20;
+<span class="nc" id="L19">    public static int WIDTH = CELLSIZE * BOARD_WIDTH + SIDEBAR;</span>
+<span class="nc" id="L20">    public static int HEIGHT = BOARD_WIDTH * CELLSIZE + TOPBAR;</span>
+    public static final int FPS = 60;
+    public String configPath;
+    public Map map;
+    public JSONObject gameInfo;
+    public GUITop guiTop;
+<span class="nc" id="L26">    public ArrayList&lt;Monsters&gt; totalMonstersList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L27">    public int currentFrame = 0;</span>
+<span class="nc" id="L28">    private boolean spawning = false;</span>
+<span class="nc" id="L29">    private int monsterSpawned = 0;</span>
+<span class="nc" id="L30">    private int spawningStartFrame = 0;</span>
+    private Waves currentWave;
+    private ArrayList&lt;Waves&gt; waveList;
+<span class="nc" id="L33">    private int speed = 1;</span>
+    private GUIRight guiRight;
+    private Wizard wizardHouse;
+<span class="nc" id="L36">    private int startingFrame = 0;</span>
+    private ArrayList&lt;Tower&gt; towers;
+<span class="nc" id="L38">    private boolean lose = false;</span>
+<span class="nc" id="L39">    private boolean win = false;</span>
+    private PImage fireBallSprite;
+    private PImage tower0;
+    private PImage tower1;
+    private PImage tower2;
+    
+    // Feel free to add any additional methods or attributes you want. Please put
+    // classes in different files.
+
+<span class="nc" id="L48">    public App() {</span>
+<span class="nc" id="L49">        this.configPath = &quot;config.json&quot;;</span>
+<span class="nc" id="L50">    }</span>
+
+    
+
+    /**
+     * Initialise the setting of the window size.
+     */
+    @Override
+    public void settings() {
+<span class="nc" id="L59">        size(WIDTH, HEIGHT);</span>
+<span class="nc" id="L60">        this.gameInfo = loadJSONObject(this.configPath);</span>
+<span class="nc" id="L61">        String layoutPath = this.gameInfo.getString(&quot;layout&quot;);</span>
+<span class="nc" id="L62">        this.map = new Map(layoutPath);</span>
+<span class="nc" id="L63">    }</span>
+
+    /**
+     * Load all resources such as images. Initialise the elements such as the
+     * player, enemies and map elements.
+     */
+    @Override
+    public void setup() {
+<span class="nc" id="L71">        frameRate(FPS);</span>
+<span class="nc" id="L72">        PImage pathImage0 = this.loadImage(&quot;src/main/resources/WizardTD/path0.png&quot;);</span>
+<span class="nc" id="L73">        PImage pathImage1 = this.loadImage(&quot;src/main/resources/WizardTD/path1.png&quot;);</span>
+<span class="nc" id="L74">        PImage pathImage2 = this.loadImage(&quot;src/main/resources/WizardTD/path2.png&quot;);</span>
+<span class="nc" id="L75">        PImage pathImage3 = this.loadImage(&quot;src/main/resources/WizardTD/path3.png&quot;);</span>
+<span class="nc" id="L76">        PImage shrubImage = this.loadImage(&quot;src/main/resources/WizardTD/shrub.png&quot;);</span>
+<span class="nc" id="L77">        PImage grassImage = this.loadImage(&quot;src/main/resources/WizardTD/grass.png&quot;);</span>
+<span class="nc" id="L78">        PImage wizardHouseImage = this.loadImage(&quot;src/main/resources/WizardTD/wizard_house.png&quot;);</span>
+<span class="nc" id="L79">        this.tower0 = this.loadImage(&quot;src/main/resources/WizardTD/tower0.png&quot;);</span>
+<span class="nc" id="L80">        this.tower1 = this.loadImage(&quot;src/main/resources/WizardTD/tower1.png&quot;);</span>
+<span class="nc" id="L81">        this.tower2 = this.loadImage(&quot;src/main/resources/WizardTD/tower2.png&quot;);</span>
+<span class="nc" id="L82">        this.fireBallSprite = this.loadImage(&quot;src/main/resources/WizardTD/fireball.png&quot;);</span>
+<span class="nc" id="L83">        this.map.addGraphics(pathImage0, this.rotateImageByDegrees(pathImage0, 90), pathImage1, this.rotateImageByDegrees(pathImage1, 90), this.rotateImageByDegrees(pathImage1, 180), this.rotateImageByDegrees(pathImage1, 270), pathImage2, this.rotateImageByDegrees(pathImage2, 90), this.rotateImageByDegrees(pathImage2, 180), this.rotateImageByDegrees(pathImage2, 270), pathImage3, shrubImage, grassImage, wizardHouseImage, this.rotateImageByDegrees(wizardHouseImage, 90), this.rotateImageByDegrees(wizardHouseImage, 180), this.rotateImageByDegrees(wizardHouseImage, 270));</span>
+<span class="nc" id="L84">        this.map.setSurrounding();</span>
+<span class="nc" id="L85">        JSONArray wavesJSONArray = this.gameInfo.getJSONArray(&quot;waves&quot;);</span>
+<span class="nc" id="L86">        int initialMana = this.gameInfo.getInt(&quot;initial_mana&quot;);</span>
+<span class="nc" id="L87">        int initialManaCap = this.gameInfo.getInt(&quot;initial_mana_cap&quot;);</span>
+<span class="nc" id="L88">        int initialManaGainedPerSec = this.gameInfo.getInt(&quot;initial_mana_gained_per_second&quot;);</span>
+<span class="nc" id="L89">        int manaPoolSpellInitialCost = this.gameInfo.getInt(&quot;mana_pool_spell_initial_cost&quot;);</span>
+<span class="nc" id="L90">        int manaPoolSpellCostIncreasePerUse = this.gameInfo.getInt(&quot;mana_pool_spell_cost_increase_per_use&quot;);</span>
+<span class="nc" id="L91">        float manaPoolSpellCapMultiplier = this.gameInfo.getFloat(&quot;mana_pool_spell_cap_multiplier&quot;);</span>
+<span class="nc" id="L92">        float manaPoolSpellManaGainedMultiplier = this.gameInfo.getFloat(&quot;mana_pool_spell_mana_gained_multiplier&quot;);</span>
+<span class="nc" id="L93">        this.wizardHouse = new Wizard(initialMana, initialManaCap, initialManaGainedPerSec);</span>
+<span class="nc" id="L94">        this.guiTop = new GUITop(wavesJSONArray, wizardHouse);</span>
+<span class="nc" id="L95">        this.guiTop.addWaves(this.loadImage(&quot;src/main/resources/WizardTD/beetle.png&quot;), this.loadImage(&quot;src/main/resources/WizardTD/gremlin.png&quot;), this.loadImage(&quot;src/main/resources/WizardTD/worm.png&quot;));</span>
+<span class="nc" id="L96">        this.waveList = this.guiTop.getWaves();</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        for (Waves wave : this.waveList) {</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">            for (Monsters monster : wave.getMonsters()) {</span>
+<span class="nc" id="L99">                monster.setWizardHouse(this.wizardHouse);</span>
+<span class="nc" id="L100">                monster.launch(this.map);</span>
+<span class="nc" id="L101">            }</span>
+<span class="nc" id="L102">        }</span>
+<span class="nc" id="L103">        this.guiRight = new GUIRight(manaPoolSpellInitialCost, manaPoolSpellCostIncreasePerUse,this.gameInfo.getInt(&quot;tower_cost&quot;),manaPoolSpellCapMultiplier, manaPoolSpellManaGainedMultiplier);</span>
+<span class="nc" id="L104">        this.towers = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L105">    }</span>
+
+    public void reset() {
+<span class="nc" id="L108">        this.settings();</span>
+<span class="nc" id="L109">        this.totalMonstersList.clear();</span>
+<span class="nc" id="L110">        this.currentFrame = 0;</span>
+<span class="nc" id="L111">        this.spawning = false;</span>
+<span class="nc" id="L112">        this.monsterSpawned = 0;</span>
+<span class="nc" id="L113">        this.spawningStartFrame = 0;</span>
+<span class="nc" id="L114">        this.waveList.clear();</span>
+<span class="nc" id="L115">        this.speed = 1;</span>
+<span class="nc" id="L116">        this.startingFrame = 0;</span>
+<span class="nc" id="L117">        this.towers.clear();</span>
+<span class="nc" id="L118">        this.lose = false;</span>
+<span class="nc" id="L119">        this.win = false;</span>
+<span class="nc" id="L120">        this.setup();</span>
+<span class="nc" id="L121">    }</span>
+
+
+    /**
+     * Receive key pressed signal from the keyboard.
+     */
+    @Override
+    public void keyPressed() {
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (key == 'f') {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            this.guiRight.setFaster(!this.guiRight.isFaster());</span>
+<span class="nc" id="L131">            this.startingFrame = this.currentFrame;</span>
+        }
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        else if (key == 'p') {</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            this.guiRight.setPause(!this.guiRight.isPausing());</span>
+        }
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        else if (key == 't') {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            this.guiRight.setBuildTower(!this.guiRight.isBuildingTower());</span>
+        }
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        else if (key == '1') {</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">            this.guiRight.setUpgradeRange(!this.guiRight.isUpgradingRange());</span>
+        }
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        else if (key == '2') {</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">            this.guiRight.setUpgradeSpeed(!this.guiRight.isUpgradingSpeed());</span>
+        }
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        else if (key == '3') {</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">            this.guiRight.setUpgradeDamage(!this.guiRight.isUpgradingDamage());</span>
+        }
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        else if (key == 'm') {</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">            this.guiRight.setManaPoolSpell(!this.guiRight.isCastingSpell());</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">            if (this.guiRight.isCastingSpell()) {</span>
+<span class="nc" id="L151">                this.guiRight.getSpell().cast(this.totalMonstersList, this.wizardHouse);</span>
+<span class="nc" id="L152">                this.guiRight.setManaPoolSpell(false);</span>
+            }
+        }
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (this.lose) {</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">            if (key == 'r') {</span>
+<span class="nc" id="L157">                this.reset();</span>
+            }
+        }
+<span class="nc" id="L160">    }</span>
+
+    /**
+     * Receive key released signal from the keyboard.
+     */
+    @Override
+    public void keyReleased() {
+
+<span class="nc" id="L168">    }</span>
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+<span class="nc" id="L173">    }</span>
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+<span class="nc" id="L178">    }</span>
+
+    @Override
+    public void mouseClicked() {
+<span class="nc bnc" id="L182" title="All 8 branches missed.">        if ((this.mouseX &gt;= 650 &amp;&amp; this.mouseX &lt;= 650+40) &amp;&amp; (this.mouseY &gt;= 48 &amp;&amp; this.mouseY &lt;=48+40)) {</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">            this.guiRight.setFaster(!this.guiRight.isFaster());</span>
+<span class="nc" id="L184">            this.startingFrame = this.currentFrame;</span>
+        }
+<span class="nc bnc" id="L186" title="All 8 branches missed.">        else if ((this.mouseX &gt;= 650 &amp;&amp; this.mouseX &lt;= 650+40) &amp;&amp; (this.mouseY &gt;= 102 &amp;&amp; this.mouseY &lt;=102+40)) {</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">            this.guiRight.setPause(!this.guiRight.isPausing());</span>
+        }
+<span class="nc bnc" id="L189" title="All 8 branches missed.">        else if ((this.mouseX &gt;= 650 &amp;&amp; this.mouseX &lt;= 650+40) &amp;&amp; (this.mouseY &gt;= 156 &amp;&amp; this.mouseY &lt;=156+40)) {</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            this.guiRight.setBuildTower(!this.guiRight.isBuildingTower());</span>
+        }
+<span class="nc bnc" id="L192" title="All 8 branches missed.">        else if ((this.mouseX &gt;= 650 &amp;&amp; this.mouseX &lt;= 650+40) &amp;&amp; (this.mouseY &gt;= 210 &amp;&amp; this.mouseY &lt;=210+40)) {</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">            this.guiRight.setUpgradeRange(!this.guiRight.isUpgradingRange());</span>
+        }
+<span class="nc bnc" id="L195" title="All 8 branches missed.">        else if ((this.mouseX &gt;= 650 &amp;&amp; this.mouseX &lt;= 650+40) &amp;&amp; (this.mouseY &gt;= 264 &amp;&amp; this.mouseY &lt;=264+40)) {</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">            this.guiRight.setUpgradeSpeed(!this.guiRight.isUpgradingSpeed());</span>
+        }
+<span class="nc bnc" id="L198" title="All 8 branches missed.">        else if ((this.mouseX &gt;= 650 &amp;&amp; this.mouseX &lt;= 650+40) &amp;&amp; (this.mouseY &gt;= 318 &amp;&amp; this.mouseY &lt;=318+40)) {</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">            this.guiRight.setUpgradeDamage(!this.guiRight.isUpgradingDamage());</span>
+        }
+<span class="nc bnc" id="L201" title="All 8 branches missed.">        else if ((this.mouseX &gt;= 650 &amp;&amp; this.mouseX &lt;= 650+40) &amp;&amp; (this.mouseY &gt;= 372 &amp;&amp; this.mouseY &lt;=372+40)) {</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">            this.guiRight.setManaPoolSpell(!this.guiRight.isCastingSpell());</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">            if (this.guiRight.isCastingSpell()) {</span>
+<span class="nc" id="L204">                this.guiRight.getSpell().cast(this.totalMonstersList, this.wizardHouse);</span>
+<span class="nc" id="L205">                this.guiRight.setManaPoolSpell(false);</span>
+            }
+        }
+<span class="nc bnc" id="L208" title="All 8 branches missed.">        else if ((this.mouseX &gt; 0 &amp;&amp; this.mouseX &lt; 640) &amp;&amp; (this.mouseY &gt; 40 &amp;&amp; this.mouseY &lt; 680)) {</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">            for (Structure[] row : this.map.getMapPlan()) {</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">                for (Structure tile : row) {</span>
+<span class="nc bnc" id="L211" title="All 8 branches missed.">                    if ((this.mouseX &gt; tile.getX() &amp;&amp; this.mouseX &lt; tile.getX() + 32) &amp;&amp; (this.mouseY &gt; tile.getY() &amp;&amp; this.mouseY &lt; tile.getY()+32)) {</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">                        if (tile.isBuildable()) {</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">                            if (this.guiRight.isBuildingTower()) {</span>
+<span class="nc" id="L214">                                Tower towerConsidered = new Tower(this.gameInfo.getInt(&quot;tower_cost&quot;), this.gameInfo.getFloat(&quot;initial_tower_range&quot;), this.gameInfo.getFloat(&quot;initial_tower_firing_speed&quot;), this.gameInfo.getInt(&quot;initial_tower_damage&quot;), tile.getX(), tile.getY());</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">                                if (this.wizardHouse.getMana() &gt; towerConsidered.getBuildCost()) {</span>
+<span class="nc" id="L216">                                    this.towers.add(towerConsidered);</span>
+<span class="nc" id="L217">                                    this.wizardHouse.buildTower(this.towers.get(this.towers.size() - 1));</span>
+<span class="nc" id="L218">                                    tile.setBuildable(false);</span>
+                                }
+                            }
+                        }
+<span class="nc bnc" id="L222" title="All 2 branches missed.">                        for (Tower tower : this.towers) {</span>
+<span class="nc bnc" id="L223" title="All 4 branches missed.">                            if (tile.getX() == tower.getX() &amp;&amp; tile.getY() == tower.getY()) {</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">                                if (this.guiRight.isUpgradingRange()) {</span>
+<span class="nc" id="L225">                                    this.wizardHouse.upgradeRange(tower);</span>
+                                }
+<span class="nc bnc" id="L227" title="All 2 branches missed.">                                if (this.guiRight.isUpgradingSpeed()) {</span>
+<span class="nc" id="L228">                                    this.wizardHouse.upgradeSpeed(tower);</span>
+                                }
+<span class="nc bnc" id="L230" title="All 2 branches missed.">                                if (this.guiRight.isUpgradingDamage()) {</span>
+<span class="nc" id="L231">                                    this.wizardHouse.upgradeDamage(tower);</span>
+                                }
+                            }
+<span class="nc" id="L234">                        }</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L239">    }</span>
+
+    /*
+     * @Override
+     * public void mouseDragged(MouseEvent e) {
+     * 
+     * }
+     */
+
+    /**
+     * Draw all elements in the game by current frame.
+     */
+    @Override
+    public void draw() {
+<span class="nc" id="L253">        this.guiRight.updateTowers(this.towers);</span>
+<span class="nc" id="L254">        this.guiTop.draw(this);</span>
+<span class="nc" id="L255">        this.map.draw(this);</span>
+<span class="nc" id="L256">        this.guiRight.draw(this);</span>
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if (this.guiRight.isFaster()) {</span>
+<span class="nc" id="L259">            this.speed = 2;</span>
+        }
+        else {
+<span class="nc" id="L262">            this.speed = 1;</span>
+        }
+
+<span class="nc bnc" id="L265" title="All 4 branches missed.">        if ((int) this.guiTop.getWaitingWave().getPreWavePause() == 0 &amp;&amp; this.monsterSpawned == 0) {</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">            if (this.guiTop.getWaveCount() &lt; this.waveList.size()) {</span>
+<span class="nc" id="L267">                this.currentWave = this.waveList.get(this.guiTop.getWaveCount());</span>
+<span class="nc" id="L268">                this.spawning = true;</span>
+            }
+            else {
+<span class="nc" id="L271">                this.spawning = false;</span>
+            }
+<span class="nc" id="L273">            this.spawningStartFrame = this.currentFrame;</span>
+        }
+
+<span class="nc bnc" id="L276" title="All 2 branches missed.">        if (this.spawning) {</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">            if (this.currentWave.getMonsters()!=null) {</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">                if (this.currentWave.getMonsters().size()!=0) {</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">                    if (this.monsterSpawned == 0) {</span>
+<span class="nc" id="L280">                        this.totalMonstersList.add(this.currentWave.getMonsters().get(this.monsterSpawned));</span>
+<span class="nc" id="L281">                        this.monsterSpawned++;</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                    } else if (this.monsterSpawned == this.currentWave.getMonsters().size()) {</span>
+<span class="nc" id="L283">                        this.spawning = false;</span>
+<span class="nc" id="L284">                        this.monsterSpawned = 0;</span>
+                    } else {
+<span class="nc bnc" id="L286" title="All 2 branches missed.">                        if (this.currentFrame - this.spawningStartFrame &gt;= this.currentWave.getSpawnInterval() * 60) {</span>
+<span class="nc" id="L287">                            this.totalMonstersList.add(this.currentWave.getMonsters().get(this.monsterSpawned));</span>
+<span class="nc" id="L288">                            this.monsterSpawned++;</span>
+<span class="nc" id="L289">                            this.spawningStartFrame = this.currentFrame;</span>
+                        }
+                    }
+                }
+            }
+        }
+
+<span class="nc bnc" id="L296" title="All 2 branches missed.">        for (Monsters monster : this.totalMonstersList) {</span>
+<span class="nc" id="L297">            monster.drawMana(this);</span>
+<span class="nc" id="L298">            monster.draw(this);</span>
+<span class="nc" id="L299">            monster.drawDeath(this);</span>
+<span class="nc bnc" id="L300" title="All 6 branches missed.">            if (!this.guiRight.isPausing() &amp;&amp; !this.win &amp;&amp; !this.lose) {</span>
+<span class="nc" id="L301">                monster.move(this.speed);</span>
+            }
+<span class="nc" id="L303">        }</span>
+
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        if (this.guiTop.getWaitingWave().getPreWavePause() != (int)this.guiTop.getWaitingWave().getPreWavePause()) {</span>
+<span class="nc" id="L306">            double diff = this.guiTop.getWaitingWave().getPreWavePause() - (int) this.guiTop.getWaitingWave().getPreWavePause();</span>
+<span class="nc" id="L307">            diff = diff - (int) diff;</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">            if (this.currentFrame == diff*FPS) {</span>
+<span class="nc" id="L309">                this.guiTop.tick();</span>
+            }
+<span class="nc" id="L311">        }</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">        else if (this.guiTop.getLastWave().getDuration() != (int) this.guiTop.getLastWave().getDuration()) {</span>
+<span class="nc" id="L313">            double diff = this.guiTop.getLastWave().getDuration() - (int) this.guiTop.getLastWave().getDuration();</span>
+<span class="nc" id="L314">            diff = diff - (int) diff;</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">            if (this.currentFrame == diff*FPS) {</span>
+<span class="nc" id="L316">                this.guiTop.tick();</span>
+            }
+        }
+<span class="nc bnc" id="L319" title="All 2 branches missed.">        for (Tower tower : this.towers) {</span>
+<span class="nc" id="L320">            tower.setSprite(this.tower0, this.tower1, this.tower2);</span>
+<span class="nc" id="L321">            tower.draw(this);</span>
+<span class="nc" id="L322">            tower.drawSign(this);</span>
+<span class="nc" id="L323">        }</span>
+
+<span class="nc bnc" id="L325" title="All 2 branches missed.">        if (this.wizardHouse.getMana() &lt;= 0) {</span>
+<span class="nc" id="L326">            this.lose = true;</span>
+        }
+        else {
+<span class="nc" id="L329">            this.win = true;</span>
+<span class="nc" id="L330">            int totalMonsters = 0;</span>
+<span class="nc bnc" id="L331" title="All 2 branches missed.">            for (Waves wave : this.guiTop.getWaves()) {</span>
+<span class="nc" id="L332">                totalMonsters += wave.getMonsters().size();</span>
+<span class="nc" id="L333">            }</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">            if (totalMonsters &gt; this.totalMonstersList.size()) {</span>
+<span class="nc" id="L335">                this.win = false;</span>
+            }
+            else {
+<span class="nc bnc" id="L338" title="All 2 branches missed.">                for (Monsters monster : this.totalMonstersList) {</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">                    if (!monster.isDisappear()) {</span>
+<span class="nc" id="L340">                        this.win = false;</span>
+<span class="nc" id="L341">                        break;</span>
+                    }
+<span class="nc" id="L343">                }</span>
+            }
+        }
+
+<span class="nc bnc" id="L347" title="All 2 branches missed.">        if (this.win) {</span>
+<span class="nc" id="L348">            this.fill(213, 24, 197);</span>
+<span class="nc" id="L349">            this.textSize(36);</span>
+<span class="nc" id="L350">            this.text(&quot;YOU WIN&quot;, 235, 230);</span>
+<span class="nc" id="L351">            return;</span>
+        }
+<span class="nc bnc" id="L353" title="All 2 branches missed.">        if (this.lose) {</span>
+<span class="nc" id="L354">            this.fill(64, 231, 90);</span>
+<span class="nc" id="L355">            this.textSize(36);</span>
+<span class="nc" id="L356">            this.text(&quot;YOU LOST&quot;, 235, 230);</span>
+<span class="nc" id="L357">            this.textSize(22);</span>
+<span class="nc" id="L358">            this.text(&quot;Press 'r' to restart&quot;, 230, 268);</span>
+<span class="nc" id="L359">            return;</span>
+        }
+
+<span class="nc bnc" id="L362" title="All 2 branches missed.">        if (this.guiRight.isPausing()) {</span>
+<span class="nc" id="L363">            return;</span>
+        }
+
+<span class="nc bnc" id="L366" title="All 2 branches missed.">        if ((this.currentFrame - this.startingFrame) % (60/this.speed) == 0) {</span>
+<span class="nc" id="L367">            this.guiTop.tick();</span>
+<span class="nc" id="L368">            this.wizardHouse.timePassed();</span>
+        }
+
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (this.towers!=null) {</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">            for (Tower tower : this.towers) {</span>
+<span class="nc bnc" id="L373" title="All 2 branches missed.">                if (tower!=null) {</span>
+<span class="nc" id="L374">                    tower.setEnemiesInRange(this.totalMonstersList);</span>
+<span class="nc" id="L375">                    tower.generateFireBall(this.currentFrame, this.speed, this.fireBallSprite);</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">                    if (tower.getFireBalls()!=null) {</span>
+<span class="nc bnc" id="L377" title="All 2 branches missed.">                        for (FireBall fireBall : tower.getFireBalls()) {</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">                            if (fireBall!=null) {</span>
+<span class="nc bnc" id="L379" title="All 2 branches missed.">                                if (fireBall.getTarget() == null) {</span>
+<span class="nc" id="L380">                                    fireBall.setTarget();</span>
+                                }
+<span class="nc" id="L382">                                fireBall.move(this.speed);</span>
+<span class="nc" id="L383">                                fireBall.draw(this);</span>
+                            }
+<span class="nc" id="L385">                        }</span>
+                    }
+<span class="nc" id="L387">                    tower.resetEnemiesInRange();</span>
+                }
+<span class="nc" id="L389">            }</span>
+        }
+
+<span class="nc" id="L392">        this.currentFrame ++;</span>
+<span class="nc" id="L393">    }</span>
+
+    public static void main(String[] args) {
+<span class="nc" id="L396">        PApplet.main(&quot;WizardTD.App&quot;);</span>
+<span class="nc" id="L397">    }</span>
+
+    /**
+     * Source:
+     * https://stackoverflow.com/questions/37758061/rotate-a-buffered-image-in-java
+     * 
+     * @param pimg  The image to be rotated
+     * @param angle between 0 and 360 degrees
+     * @return the new rotated image
+     */
+    public PImage rotateImageByDegrees(PImage pimg, double angle) {
+<span class="nc" id="L408">        BufferedImage img = (BufferedImage) pimg.getNative();</span>
+<span class="nc" id="L409">        double rads = Math.toRadians(angle);</span>
+<span class="nc" id="L410">        double sin = Math.abs(Math.sin(rads));</span>
+<span class="nc" id="L411">        double cos = Math.abs(Math.cos(rads));</span>
+<span class="nc" id="L412">        int w = img.getWidth();</span>
+<span class="nc" id="L413">        int h = img.getHeight();</span>
+<span class="nc" id="L414">        int newWidth = (int) Math.floor(w * cos + h * sin);</span>
+<span class="nc" id="L415">        int newHeight = (int) Math.floor(h * cos + w * sin);</span>
+
+<span class="nc" id="L417">        PImage result = this.createImage(newWidth, newHeight, ARGB);</span>
+<span class="nc" id="L418">        BufferedImage rotated = (BufferedImage) result.getNative();</span>
+<span class="nc" id="L419">        Graphics2D g2d = rotated.createGraphics();</span>
+<span class="nc" id="L420">        AffineTransform at = new AffineTransform();</span>
+<span class="nc" id="L421">        at.translate((float) (newWidth - w) / 2, (float)(newHeight - h) / 2);</span>
+
+<span class="nc" id="L423">        int x = w / 2;</span>
+<span class="nc" id="L424">        int y = h / 2;</span>
+
+<span class="nc" id="L426">        at.rotate(rads, x, y);</span>
+<span class="nc" id="L427">        g2d.setTransform(at);</span>
+<span class="nc" id="L428">        g2d.drawImage(img, 0, 0, null);</span>
+<span class="nc" id="L429">        g2d.dispose();</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">        for (int i = 0; i &lt; newWidth; i++) {</span>
+<span class="nc bnc" id="L431" title="All 2 branches missed.">            for (int j = 0; j &lt; newHeight; j++) {</span>
+<span class="nc" id="L432">                result.set(i, j, rotated.getRGB(i, j));</span>
+            }
+        }
+<span class="nc" id="L435">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

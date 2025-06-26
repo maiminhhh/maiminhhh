@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="WizardTD.StaticGraphicsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-04-23T17:54:26" hostname="maiminhhh.shared.sydney.edu.au" time="0.004">
+  <properties/>
+  <testcase name="testSetX()" classname="WizardTD.StaticGraphicsTest" time="0.0"/>
+  <testcase name="testSetY()" classname="WizardTD.StaticGraphicsTest" time="0.0"/>
+  <testcase name="testConstruction()" classname="WizardTD.StaticGraphicsTest" time="0.001"/>
+  <testcase name="testSetSprite()" classname="WizardTD.StaticGraphicsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

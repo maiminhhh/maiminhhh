@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="WizardTD.WavesTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2025-04-23T17:54:26" hostname="maiminhhh.shared.sydney.edu.au" time="0.005">
+  <properties/>
+  <testcase name="testPreWaveTimePassed()" classname="WizardTD.WavesTest" time="0.0"/>
+  <testcase name="testWaveWithoutMonstersConstruction()" classname="WizardTD.WavesTest" time="0.0"/>
+  <testcase name="testWaveNullMonstersConstruction()" classname="WizardTD.WavesTest" time="0.0"/>
+  <testcase name="testSetDuration()" classname="WizardTD.WavesTest" time="0.001"/>
+  <testcase name="testTimePassed()" classname="WizardTD.WavesTest" time="0.001"/>
+  <testcase name="testWaveWithMonstersConstruction()" classname="WizardTD.WavesTest" time="0.0"/>
+  <testcase name="testSetPreWavePause()" classname="WizardTD.WavesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="WizardTD.ManaPoolSpellTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-04-23T17:54:26" hostname="maiminhhh.shared.sydney.edu.au" time="0.004">
+  <properties/>
+  <testcase name="testConstruction()" classname="WizardTD.ManaPoolSpellTest" time="0.001"/>
+  <testcase name="testCastSpellNotEnoughMana()" classname="WizardTD.ManaPoolSpellTest" time="0.001"/>
+  <testcase name="testCastSpellNullMonsters()" classname="WizardTD.ManaPoolSpellTest" time="0.001"/>
+  <testcase name="testCastSpellNormalCase()" classname="WizardTD.ManaPoolSpellTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="WizardTD.FireBallTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2025-04-23T17:54:26" hostname="maiminhhh.shared.sydney.edu.au" time="0.099">
+  <properties/>
+  <testcase name="testMoveDeadTarget()" classname="WizardTD.FireBallTest" time="0.061"/>
+  <testcase name="testMoveNotNullTargetIsDisappear()" classname="WizardTD.FireBallTest" time="0.007"/>
+  <testcase name="testConstruction()" classname="WizardTD.FireBallTest" time="0.003"/>
+  <testcase name="testMoveDistanceTouchTarget()" classname="WizardTD.FireBallTest" time="0.002"/>
+  <testcase name="testSetTargetWithTargetNotInRange()" classname="WizardTD.FireBallTest" time="0.001"/>
+  <testcase name="testSetTargetWithValidTowerTarget()" classname="WizardTD.FireBallTest" time="0.001"/>
+  <testcase name="testSetTargetNullMonsters()" classname="WizardTD.FireBallTest" time="0.002"/>
+  <testcase name="testMoveNullTargetNotDisappear()" classname="WizardTD.FireBallTest" time="0.001"/>
+  <testcase name="testMoveHaveJustTouchTarget()" classname="WizardTD.FireBallTest" time="0.001"/>
+  <testcase name="testSetTargetWithDeadTarget()" classname="WizardTD.FireBallTest" time="0.001"/>
+  <testcase name="testMoveNoDistance()" classname="WizardTD.FireBallTest" time="0.001"/>
+  <testcase name="testMoveNotTouchYet()" classname="WizardTD.FireBallTest" time="0.001"/>
+  <testcase name="testSetTargetWithMonstersInRange()" classname="WizardTD.FireBallTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

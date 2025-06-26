@@ -1,0 +1,488 @@
+---
+title: "[DATA3888] Disciplinary Assessment 1 - Biomedical"
+author: "510569026"
+format:
+  html:
+    code-tools: true
+    code-fold: true
+    fig_caption: yes
+    number_sections: yes
+    embed-resources: true
+    theme: flatly
+    #css: 
+     # - https://use.fontawesome.com/releases/v5.0.6/css/all.css
+    toc: true
+    toc_depth: 4
+    toc_float: true
+execute:
+  echo: true
+  tidy: true
+---
+
+# Exponential Data Analysis (EDA)
+
+## Data cleaning
+
+### Packages loading
+
+```{r packages, warning = FALSE, message = FALSE}
+library(janitor)
+library(tidyverse)
+library(naniar)
+library(limma)
+library(tidyverse)
+library(Biobase)
+library(edgeR)
+library(DT)
+library(ggiraph)
+library(glue)
+library(gridExtra)
+library(patchwork)
+library(plotly)
+library(class)
+library(randomForest)
+library(rpart)
+library(caret)
+```
+
+### Dataset imported
+
+```{r datasetImport1, warning = FALSE, message = FALSE}
+# import the whole RData file
+load('GSE57387.RData')
+# gene expression matrix - recorded genes for each patient
+## rows: genes, cols: patients
+eMat1 = exprs(gse)
+# phenotype data - information about patients
+pData1 = phenoData(gse)
+# feature data - information about the genes being recorded in expression matrix
+fData1 = fData(gse)
+```
+
+### Phenotype data
+
+```{r pData1_cleaning, warning = FALSE, message = FALSE}
+# remove varMetadata from phenotype data as it contains no information (all descriptions are NA)
+pData1 = pData1@data
+# remove uninformative variables (i.e. variables that record the same value across all observations)
+pData1 = pData1 |> remove_constant(na.rm = TRUE)
+pData1 = pData1 |> select(-supplementary_file)
+# clean up column names
+colnames(pData1) = c('title', 'geo_accession', 'characteristics1', 'characteristics1.1', 
+                     'characteristics1.2', 'label_protocol', 'cadi12', 'cadi3')
+# replace '--' in cadi12 and cadi3 placeholders by NA values
+pData1$cadi3 = ifelse(pData1$cadi3 == '--',
+                      yes = NA,
+                      no = pData1$cadi3)
+pData1$cadi12 = ifelse(pData1$cadi12 == '--',
+                       yes = NA,
+                       no = pData1$cadi12)
+# determine the value of cadi12
+## choose to keep the greater value of cadi-12 as a false positive is better than a false negative in this case
+for (i in 1:nrow(pData1)) {
+  if (pData1$cadi12[i] |> is.na()) {
+    next
+  } 
+  if (str_detect(pData1$cadi12[i], ';') == TRUE) {
+    scores = str_split(pData1$cadi12[i], ';')[[1]]
+    pData1$cadi12[i] = 
+      scores |> 
+      as.numeric() |> 
+      max() |> 
+      as.character()
+  }
+}
+# change cadi12 and cadi3 to its numeric form
+pData1$cadi3 = as.numeric(pData1$cadi3)
+pData1$cadi12 = as.numeric(pData1$cadi12)
+# as the characteristics1, characteristics1.1 and characteristics1.2 columns are repititive of cadi3 and cadi12, they are also removed
+pData1 = pData1 |> select(-c(characteristics1, characteristics1.1, characteristics1.2))
+# categorise cadi3 and cadi12 values
+## stable: < 2
+## reject: >= 2
+### cadi3
+for (i in 1:nrow(pData1)) {
+  if (pData1$cadi3[i] |> is.na()) {
+    pData1$cadi3_cat[i] = NA
+    next
+  }
+  if (pData1$cadi3[i] < 2) {
+    pData1$cadi3_cat[i] = 'stable'
+    next
+  }
+  pData1$cadi3_cat[i] = 'reject'
+}
+### cadi12
+for (i in 1:nrow(pData1)) {
+  if (pData1$cadi12[i] |> is.na()) {
+    pData1$cadi12_cat[i] = NA
+    next
+  }
+  if (pData1$cadi12[i] < 2) {
+    pData1$cadi12_cat[i] = 'stable'
+    next
+  }
+  pData1$cadi12_cat[i] = 'reject'
+}
+# remove observations where both cadi are NA
+pData1 = pData1 |> filter(!is.na(pData1$cadi3_cat) | !is.na(pData1$cadi12_cat))
+```
+
+### Feature data
+
+```{r fData1_cleaning1, warning = FALSE, message = FALSE}
+# replace the empty placeholders with NA
+fData1 = replace_with_na_all(fData1,
+                            condition = ~.x %in% c('---', '', 'Not Annotated'))
+# clean up column names
+fData1 = clean_names(fData1, 'old_janitor')
+# turn quantitative variables into numeric
+fData1$range_start = as.numeric(fData1$range_start)
+fData1$range_stop = as.numeric(fData1$range_stop)
+fData1$total_probes = as.numeric(fData1$total_probes)
+# remove uninformative variables
+fData1 = fData1 |> remove_constant(na.rm = TRUE)
+```
+
+```{r}
+# create a gene dictionary containing the gene's accession, symbol, and description as specified in the gene_assignment variable of fData1
+gene_symbol = c()
+gene_id = fData1$id
+gene_assignment = fData1$gene_assignment
+for (g in gene_assignment) {
+  g_ls = str_split(g, '//')[[1]]
+  gene_symbol = append(gene_symbol, g_ls[2] |> str_trim())
+  }
+gDict = data.frame(gene_id, gene_symbol)
+```
+
+-   Information about gene assignment can now be obtained from searching the corresponding gene accession stored in the gb_list column -\> get rid of it
+
+-   Not analysing on the basis of mRNA -\> get rid of mrna_assignment
+
+```{r fData_cleaning2, warning = FALSE, message = FALSE}
+# exclude gene and mrna assignment from the feature data
+fData1 = fData1 |> select(-c(gene_assignment, mrna_assignment, gb_list))
+```
+
+## Differential Expression Analysis
+
+### CADI in 3 months
+
+```{r dea_cadi3, warning = FALSE, message = FALSE}
+# extract the cadi3 score for differential expression analysis
+dea3_cadi = pData1$cadi3_cat
+# exclude the samples whose cadi3 is not recorded
+dea3_noNA_samples = pData1$geo_accession[!is.na(dea3_cadi)]
+# filter out the non-observed value of cadi3
+dea3_noNA_cadi = dea3_cadi[!is.na(dea3_cadi)]
+# exclude the samples without a recorded cadi3 from the expression matrix
+dea3_eMat = eMat1[,dea3_noNA_samples]
+# create a design matrix based on cadi3
+dea3_design = model.matrix(~dea3_noNA_cadi)
+# perform limma on cadi3 to test for differential expression on reject and stable cadi3
+dea3_fit = lmFit(dea3_eMat, dea3_design)
+dea3_fit = dea3_fit |> eBayes()
+# output the result
+dea3 = topTable(dea3_fit, adjust.method = 'fdr', number = nrow(dea3_fit), 
+                genelist = rownames(dea3_fit) |> as.numeric())
+# transfer gene id into gene symbol
+gene_symbol = c()
+id = dea3$ID
+for (i in id) {
+  gene_symbol = append(gene_symbol, filter(gDict, gene_id == i)$gene_symbol)
+}
+dea3 = dea3 |> signif(3)
+dea3$ID = gene_symbol
+colnames(dea3)[1] = 'symbol' 
+dea3 |> datatable()
+```
+
+-   The significantly high adjusted P-value could possibly be due to the adjustment for multiple test applied to a large number of variables. Plus, the variables here are actually gene sets, one gene could be shared across multiple gene sets, making the adjusted P-value here too stringent
+
+-   Also, in performing such a large number of t.tests, we are aiming at feature selection, i.e. excluding all the genes that are the same across 2 classes of cadi-m3. Hence, we would focus more on the raw p value and logFC
+
+### CADI in 12 months
+
+```{r dea_cadi12, warning = FALSE, message = FALSE}
+# extract the cadi12 score for differential expression analysis
+dea12_cadi = pData1$cadi12_cat
+# exclude the samples whose cadi12 is not recorded
+dea12_noNA_samples = pData1$geo_accession[!is.na(dea12_cadi)]
+# filter out the non-observed value of cadi12
+dea12_noNA_cadi = dea12_cadi[!is.na(dea12_cadi)]
+# exclude the samples without a recorded cadi12 from the expression matrix
+dea12_eMat = (eMat1[,dea12_noNA_samples])
+# create a design matrix based on cadi12
+dea12_design = model.matrix(~dea12_noNA_cadi)
+# perform limma on cadi12 to test for differential expression on reject and stable cadi12
+dea12_fit = lmFit(dea12_eMat, dea12_design)
+dea12_fit = dea12_fit |> eBayes()
+# output table
+dea12 = dea12_fit |> topTable(n = Inf, adjust.method = 'fdr', 
+                              genelist = dea12_fit |> rownames() |> as.numeric())
+# transfer gene id into gene symbol
+gene_symbol = c()
+id = dea12$ID
+for (i in id) {
+  gene_symbol = append(gene_symbol, filter(gDict, gene_id == i)$gene_symbol)
+}
+# round to 3 decimal points
+dea12_rounded = dea12 |> signif(3)
+dea12_rounded$ID = gene_symbol
+colnames(dea12_rounded)[1] = 'symbol'
+# store the result of differential expression analysis for cadi 12
+dea12$ID = gene_symbol
+colnames(dea12)[1] = 'symbol'
+# printing out the top table of limma for cadi 12
+dea12_rounded |> datatable()
+```
+
+```{r dea12_maPlot, warning = FALSE, message = FALSE}
+dea12 = topTable(dea12_fit, number = nrow(dea12_fit), genelist = rownames(dea12_eMat |> data.frame()))
+cadi12_gen = c()
+# significant genes have either:
+  ## adjusted p value < 0.05
+# or
+  ## adjusted p value < 0.1 and:
+    ### more significant log FC, i.e. abs(logFC) > 0.5
+  # or
+    ### more significant average expression, i.e. aveexpr > 12.5
+dea12$significant = with(dea12, adj.P.Val < 0.05 | 
+                                  (adj.P.Val < 0.1 & abs(logFC) > 0.5) | 
+                                  (adj.P.Val < 0.1 & AveExpr > 12.5))
+# transfer gene id into gene symbol
+gene_symbol = c()
+sig_id = dea12$ID
+for (id in sig_id) {
+  gene_symbol = append(gene_symbol, filter(gDict, gene_id == id)$gene_symbol)
+}
+dea12$symbol = gene_symbol
+maPlot_cadi12 = 
+  ggplot(dea12, aes(x = AveExpr, y = logFC, tooltip = symbol, data_id = symbol)) +
+  geom_point(aes(colour = significant), alpha = 1/3, size = 1) +
+  geom_point_interactive(data = subset(dea12, significant == 'TRUE'), 
+                         aes(colour = significant)) +
+  scale_colour_manual(values = c('TRUE' = 'red', 'FALSE' = 'blue')) +
+  labs(y = 'log 2 fold change', x = 'Average expression')
+```
+
+```{r dea12_volcanoPlot, warning = FALSE, message = FALSE}
+volcano_cadi12 = 
+  ggplot(dea12, aes(logFC, -log10(P.Value),
+                   tooltip = symbol, data_id = symbol, colour = significant)) +
+  geom_point(alpha = 0.6, size = 1) +
+  geom_point_interactive(data = subset(dea12, significant == TRUE),
+                         aes(colour = significant)) +
+  scale_colour_manual(values = c('TRUE' = 'red', 'FALSE' = 'blue')) +
+  labs(x = 'log2 fold change', y = '-log10 p-value') +
+  theme_minimal()
+```
+
+```{r dea12_viz, warning = FALSE, message = FALSE}
+combined_cadi12 = volcano_cadi12 + maPlot_cadi12 + plot_layout(ncol = 2)
+girafe(code = print(combined_cadi12))
+```
+
+```{r significant_genes_cadi12, message = FALSE, warning = FALSE}
+filter(dea12, significant == TRUE)$symbol
+```
+
+```{r boxplot_cadi12, warning = FALSE, message = FALSE}
+significant_dea12 = dea12 |> filter(significant == TRUE)
+significant_dea12_symbol = significant_dea12$symbol
+significant_dea12_id = significant_dea12$ID
+eMat1_significant_dea12 = dea12_eMat[significant_dea12_id, ] |> t()
+dea12_boxplot = eMat1_significant_dea12 |> data.frame()
+colnames(dea12_boxplot) = significant_dea12_symbol
+dea12_boxplot <- dea12_boxplot %>%
+  pivot_longer(cols = everything(), names_to = "Gene", values_to = "Expression")
+boxplot_cadi12 = c()
+for (i in dea12_noNA_cadi) {
+  boxplot_cadi12 = append(boxplot_cadi12, rep(i, 10))
+}
+dea12_boxplot$cadi = boxplot_cadi12
+boxplot_cadi12 = ggplot(data = dea12_boxplot, aes(x = Gene, y = Expression, col = cadi)) +
+  geom_boxplot() + theme_minimal()
+boxplot_cadi12 |> ggplotly() |> layout(boxmode = "group")
+```
+
+# Building Model
+
+## Test data - cleaning
+
+### Dataset imported
+
+```{r datasetImport2, warning = FALSE, message = FALSE}
+# import the whole RData file
+load('GSE46474.RData')
+eMat2 = exprs(gse)
+fData2 = fData(gse)
+pData2 = pData(gse)
+```
+
+### Phenotype data
+
+```{r pData2_cleaning, warning = FALSE, message = FALSE}
+# remove constant variables
+pData2 = pData2 |> remove_constant(na.rm = TRUE)
+pData2 = pData2 |> select(-c('source_name_ch1', 'characteristics_ch1', 'characteristics_ch1.1',
+                            'characteristics_ch1.2', 'characteristics_ch1.3', 
+                            'characteristics_ch1.5', 'characteristics_ch1.6',
+                            'supplementary_file'))
+colnames(pData2) = c('title', 'geo_accession', 'description', 'age', 'collection_day',
+                     'procedure_status', 'race', 'sample_group', 'sex')
+responses = c()
+for (i in 1:nrow(pData2)) {
+  stat = pData2$procedure_status[i]
+  if (str_detect(stat, 'AR')) {
+    responses = append(responses, 'reject')
+    next
+  }
+  responses = append(responses, 'stable')
+}
+pData2$responses = responses
+pData2 = pData2 |> select(-'procedure_status')
+y_test = pData2$responses
+```
+
+### Feature data
+
+```{r fData2_cleaning, warning = FALSE, message = FALSE}
+fData2 = fData2 |> remove_constant(na.rm = TRUE)
+fData2 = clean_names(fData2, 'old_janitor')
+fData2 = fData2 |> select(c('id', 'gb_acc', 'representative_public_id', 'gene_symbol'))
+for (i in 1:nrow(fData2)) {
+  symbol = fData2$gene_symbol[i]
+  if (symbol |> is.na() == TRUE) {
+    next
+  }
+  if(str_detect(symbol, '///') == TRUE) {
+    symbol = str_split(symbol, '///')[[1]][1] |> str_trim()
+    fData2$gene_symbol[i] = symbol
+  }
+}
+```
+
+```{r updateGdict, warning = FALSE, message = FALSE}
+gene_id2 = list()
+for (i in 1:nrow(gDict)) {
+  symbol = gDict$gene_symbol[i]
+  id_fData2 = filter(fData2, gene_symbol == symbol)$id |> list()
+  gene_id2 = append(gene_id2, id_fData2)
+}
+gDict$gene_id2 = gene_id2
+```
+
+### Expression matrix
+
+```{r eMat2_cleaning, warning = FALSE, message = FALSE}
+eMat2_trans = data.frame()
+for (id in gDict$gene_id) {
+  gene_id2 = filter(gDict, gene_id == id)$gene_id2[[1]]
+  if (length(gene_id2) == 1) {
+    exprs = eMat2[gene_id2, ]
+    eMat2_trans = rbind(eMat2_trans, exprs)
+    rownames(eMat2_trans)[nrow(eMat2_trans)] = id
+    next
+  }
+  exprs = eMat2[gene_id2, ]
+  new_row = colSums(exprs)/length(gene_id2)
+  eMat2_trans = rbind(eMat2_trans, new_row)
+  rownames(eMat2_trans)[nrow(eMat2_trans)] = id
+}
+eMat2_trans = eMat2_trans |> na.omit()
+eMat1_pca = eMat1[eMat2_trans |> rownames(), ]
+```
+
+## CADI-3
+
+```{r cadi3_pca, warning = FALSE, message = FALSE}
+eMat1_pca = eMat1_pca[,dea3_noNA_samples]
+pca_cadi3 = prcomp(t(eMat1_pca))
+pca_trainMat = pca_cadi3$x |> t()
+significant_pc = c()
+for (i in 1:nrow(pca_trainMat)) {
+  if (i > 40) {
+    break
+  }
+  id = rownames(pca_trainMat)[i]
+  pval = t.test(pca_trainMat[id,]~dea3_noNA_cadi)$p.value
+  if (pval < 0.05) {
+    significant_pc = append(significant_pc, id)
+  }
+}
+pca_trainMat = pca_trainMat[significant_pc, ]
+```
+
+```{r testSet_pca, warning = FALSE, message = FALSE}
+eMat2_pca = prcomp(t(eMat2_trans))
+eMat2_pca = eMat2_pca$x |> t()
+eMat2_pca = eMat2_pca[significant_pc, ]
+```
+
+```{r logRegression_cadi3, warning = FALSE, message = FALSE}
+#trainMat_logReg = pca_trainMat |> t() |> data.frame()
+#trainMat_logReg$cadi3 = dea3_noNA_cadi == 'reject'
+#y_test_logReg = ifelse(y_test == 'reject', 1, 0)
+#cadi3_glm <- glm(cadi3~., data = trainMat_logReg, family = binomial)
+#probs_glm <- predict(cadi3_glm, eMat2_pca |> t() |> data.frame(), type = "response")
+#predicted_glm <- ifelse(probs_glm > 0.5, "reject", "stable")
+#table(y_test, predicted_glm)
+```
+
+```{r cadi3_randomForest, warning = FALSE, message = FALSE}
+trainMat_rf = pca_trainMat |> t() |> data.frame()
+trainMat_rf$cadi3 = dea3_noNA_cadi
+trained_rf = randomForest(factor(cadi3) ~ ., data = trainMat_rf)
+y_test_rf = factor(y_test)
+predicted_rf = predict(trained_rf, eMat2_pca |> t() |> data.frame())
+table(y_test_rf, predicted_rf)
+```
+
+## CADI-12
+
+```{r cadi12_randomForest, warning = FALSE, message = FALSE}
+significant_dea12 = significant_dea12 |> filter(!symbol%in% c('GABRP', 'GCNT3', 'LAMC2', 'KLHL13', 'SLC34A2'))
+trainMat_rf = dea12_eMat[significant_dea12 |> rownames(), ] |> t() |> data.frame()
+X_test_cadi12Rf = eMat2_trans[significant_dea12 |> rownames(), ] |> 
+  remove_empty(which = 'rows') |> t() |> 
+  data.frame()
+X_train_cadi12Rf = trainMat_rf[,colnames(X_test_cadi12Rf)]
+X_train_cadi12Rf = scale(X_train_cadi12Rf) |> data.frame()
+X_train_cadi12Rf$cadi12 = dea12_noNA_cadi
+X_test_cadi12Rf = scale(X_test_cadi12Rf) |> data.frame()
+train_control = trainControl(method = "cv", number = 10)
+cadi12_trained_rf = randomForest(factor(cadi12)~., data = X_train_cadi12Rf,
+                                 ntree = 2000, trControl = train_control)
+predicted_rf = predict(cadi12_trained_rf, X_test_cadi12Rf)
+table(predicted_rf, y_test)
+```
+
+```{r cadi12_knn, warning = FALSE, message = FALSE}
+predicted_knn = knn(train = X_train_cadi12Rf |> select(-cadi12), test = X_test_cadi12Rf, cl = X_train_cadi12Rf$cadi12, k = 5)
+table(y_test, predicted_knn)
+```
+
+```{r}
+X_test_cadi12Rf$cadi12 = y_test
+ggplot(data = X_test_cadi12Rf, aes(y = X3596147, color = cadi12)) +
+  geom_boxplot()
+ggplot(data = X_train_cadi12Rf, aes(y = X3596147, color = cadi12)) +
+  geom_boxplot()
+```
+
+```{r}
+library(sparsediscrim)
+trained_dlda = lda_diag(cadi12 ~ . , data = X_train_cadi12Rf)
+predicted_dlda = predict(trained_dlda, X_test_cadi12Rf |> select(-cadi12))
+table(y_test, predicted_dlda)
+```
+
+```{r svm_cadi12, warning = FALSE, message = FALSE}
+library(e1071)
+trained_svm = svm(X_train_cadi12Rf |> select(-cadi12), 
+                  X_train_cadi12Rf$cadi12 |> factor(), kernel = 'sigmoid')
+predicted_svm = predict(trained_svm, X_test_cadi12Rf |> select(-cadi12))
+table(y_test, predicted_svm)
+```

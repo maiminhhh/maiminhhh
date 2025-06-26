@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Structure.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">scaffold</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Structure.java</span></div><h1>Structure.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import java.util.ArrayList;
+import processing.core.PImage;
+
+public class Structure extends StaticGraphics {
+    final private String type;
+    final private boolean pathable;
+    private Structure frontStructure;
+    private Structure backStructure;
+    private Structure aboveStructure;
+    private Structure belowStructure;
+    final private boolean destination;
+    final private boolean startable;
+    final private int row;
+    final private int col;
+    private int g;
+    private int h;
+    private Structure parent;
+    private boolean buildable;
+    public Structure(PImage sprite, int x, int y, String type) {
+<span class="fc" id="L22">        super(x,y);</span>
+<span class="fc" id="L23">        this.setSprite(sprite);</span>
+<span class="fc" id="L24">        this.type = type;</span>
+<span class="fc" id="L25">        this.row = (this.y-41)/32;</span>
+<span class="fc" id="L26">        this.col = this.x/32;</span>
+<span class="fc" id="L27">        this.g = 0;</span>
+<span class="fc" id="L28">        this.h = 0;</span>
+<span class="fc" id="L29">        this.parent = null;</span>
+<span class="fc bfc" id="L30" title="All 4 branches covered.">        if (this.type.equals(&quot;path&quot;) || this.type.equals(&quot;wizard house&quot;)) {</span>
+<span class="fc" id="L31">            this.pathable = true;</span>
+        }
+        else {
+<span class="fc" id="L34">            this.pathable = false;</span>
+        }
+<span class="fc bfc" id="L36" title="All 10 branches covered.">        if (this.type.equals(&quot;path&quot;) &amp;&amp; (this.row == 0 || this.row == 19 || this.col == 0 || this.col == 19)) {</span>
+<span class="fc" id="L37">            this.startable = true;</span>
+        }
+        else {
+<span class="fc" id="L40">            this.startable = false;</span>
+        }
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (this.type.equals(&quot;wizard house&quot;)){</span>
+<span class="fc" id="L43">            this.destination = true;</span>
+        }
+        else {
+<span class="fc" id="L46">            this.destination = false;</span>
+        }
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (this.type.equals(&quot;grass&quot;)) {</span>
+<span class="fc" id="L49">            this.buildable = true;</span>
+        }
+        else {
+<span class="fc" id="L52">            this.buildable = false;</span>
+        }
+<span class="fc" id="L54">    }</span>
+
+    public boolean isStartable() {
+<span class="fc" id="L57">        return this.startable;</span>
+    }
+
+    public boolean isPathable() {
+<span class="fc" id="L61">        return this.pathable;</span>
+    }
+
+    public boolean isBuildable() {
+<span class="fc" id="L65">        return this.buildable;</span>
+    }
+
+    public void setBuildable(boolean buildable) {
+<span class="fc" id="L69">        this.buildable = buildable;</span>
+<span class="fc" id="L70">    }</span>
+    public Structure getAbove() {
+<span class="fc" id="L72">        return this.aboveStructure;</span>
+    }
+
+    public Structure getBelow() {
+<span class="fc" id="L76">        return this.belowStructure;</span>
+    }
+
+    public Structure getFront() {
+<span class="fc" id="L80">        return this.frontStructure;</span>
+    }
+
+    public Structure getBack() {
+<span class="fc" id="L84">        return this.backStructure;</span>
+    }
+
+    public void setAbove(Structure above) {
+<span class="fc" id="L88">        this.aboveStructure = above;</span>
+<span class="fc" id="L89">    }</span>
+
+    public void setBelow(Structure below) {
+<span class="fc" id="L92">        this.belowStructure = below;</span>
+<span class="fc" id="L93">    }</span>
+    
+    public void setFront(Structure front) {
+<span class="fc" id="L96">        this.frontStructure = front;</span>
+<span class="fc" id="L97">    }</span>
+
+    public void setBack(Structure back) {
+<span class="fc" id="L100">        this.backStructure = back;</span>
+<span class="fc" id="L101">    }</span>
+
+    public boolean isDestination(){
+<span class="fc" id="L104">        return this.destination;</span>
+    }
+
+    public Structure getParent() {
+<span class="fc" id="L108">        return this.parent;</span>
+    }
+
+    public ArrayList&lt;Structure&gt; getNeighbors() {
+<span class="fc" id="L112">        ArrayList&lt;Structure&gt; neighbors = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L113">        neighbors.add(this.getAbove());</span>
+<span class="fc" id="L114">        neighbors.add(this.getFront());</span>
+<span class="fc" id="L115">        neighbors.add(this.getBelow());</span>
+<span class="fc" id="L116">        neighbors.add(this.getBack());</span>
+<span class="fc" id="L117">        return neighbors;</span>
+    }
+
+    public int getG() {
+<span class="fc" id="L121">        return this.g;</span>
+    }
+    public void setG(int g) {
+<span class="fc" id="L124">        this.g = g;</span>
+<span class="fc" id="L125">    }</span>
+
+    public int getRow() {
+<span class="fc" id="L128">        return this.row;</span>
+    }
+
+    public int getCol() {
+<span class="fc" id="L132">        return this.col;</span>
+    }
+
+    public int h(Structure destination){
+<span class="fc" id="L136">        int rowDist = Math.abs(this.row - destination.getRow());</span>
+<span class="fc" id="L137">        int colDist = Math.abs(this.col - destination.getCol());</span>
+<span class="fc" id="L138">        return rowDist + colDist;</span>
+    }
+
+    public void setH(int h) {
+<span class="fc" id="L142">        this.h = h;</span>
+<span class="fc" id="L143">    }</span>
+
+    public int getH() {
+<span class="fc" id="L146">        return this.h;</span>
+    }
+
+    public void setParent(Structure parent) {
+<span class="fc" id="L150">        this.parent = parent;</span>
+<span class="fc" id="L151">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

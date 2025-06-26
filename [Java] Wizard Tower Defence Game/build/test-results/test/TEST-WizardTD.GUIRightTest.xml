@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="WizardTD.GUIRightTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2025-04-23T17:54:26" hostname="maiminhhh.shared.sydney.edu.au" time="0.018">
+  <properties/>
+  <testcase name="testUpdateTowersNotYetContain()" classname="WizardTD.GUIRightTest" time="0.003"/>
+  <testcase name="testConstruction()" classname="WizardTD.GUIRightTest" time="0.001"/>
+  <testcase name="testSetManaPoolSpell()" classname="WizardTD.GUIRightTest" time="0.001"/>
+  <testcase name="testSetFaster()" classname="WizardTD.GUIRightTest" time="0.001"/>
+  <testcase name="testUpdateTowersContained()" classname="WizardTD.GUIRightTest" time="0.001"/>
+  <testcase name="testSetUpgradeSpeed()" classname="WizardTD.GUIRightTest" time="0.0"/>
+  <testcase name="testSetUpgradeDamage()" classname="WizardTD.GUIRightTest" time="0.001"/>
+  <testcase name="testSetUpgraderange()" classname="WizardTD.GUIRightTest" time="0.0"/>
+  <testcase name="testSetBuildTower()" classname="WizardTD.GUIRightTest" time="0.001"/>
+  <testcase name="testSetPause()" classname="WizardTD.GUIRightTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

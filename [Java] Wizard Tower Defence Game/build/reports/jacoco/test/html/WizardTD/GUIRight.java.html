@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GUIRight.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">scaffold</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">GUIRight.java</span></div><h1>GUIRight.java</h1><pre class="source lang-java linenums">package WizardTD;
+import processing.core.PApplet;
+import java.util.*;
+public class GUIRight {
+    //class attributes
+    private boolean faster;
+    private boolean pause;
+    private boolean buildTower;
+    private boolean upgradeRange;
+    private boolean upgradeSpeed;
+    private boolean upgradeDamage;
+    private boolean manaPoolSpell;
+    private ManaPoolSpell spell;
+    private int buildCost;
+<span class="fc" id="L15">    private ArrayList&lt;Tower&gt; towers = new ArrayList&lt;&gt;();</span>
+
+    //constructor method
+<span class="fc" id="L18">    public GUIRight(int manaPoolSpellCost, int manaPoolCostIncreasePerUse, int buildCost, float capMultiplier, float manaGainedMultiplier) {</span>
+<span class="fc" id="L19">        this.faster = false;</span>
+<span class="fc" id="L20">        this.pause = false;</span>
+<span class="fc" id="L21">        this.buildTower = false;</span>
+<span class="fc" id="L22">        this.upgradeRange = false;</span>
+<span class="fc" id="L23">        this.upgradeSpeed = false;</span>
+<span class="fc" id="L24">        this.upgradeDamage = false;</span>
+<span class="fc" id="L25">        this.manaPoolSpell = false;</span>
+<span class="fc" id="L26">        this.spell = new ManaPoolSpell(manaPoolSpellCost, manaPoolCostIncreasePerUse, capMultiplier, manaGainedMultiplier);</span>
+<span class="fc" id="L27">        this.buildCost = buildCost;</span>
+<span class="fc" id="L28">    }</span>
+
+    //check if the game is faster forward
+    public boolean isFaster() {
+<span class="fc" id="L32">        return this.faster;</span>
+    }
+
+    //check if the game is paused
+    public boolean isPausing() {
+<span class="fc" id="L37">        return this.pause;</span>
+    }
+
+    //check if the player has chosen to build a tower
+    public boolean isBuildingTower() {
+<span class="fc" id="L42">        return this.buildTower;</span>
+    }
+
+    //check if the player has chosen to upgrade the range
+    public boolean isUpgradingRange() {
+<span class="fc" id="L47">        return this.upgradeRange;</span>
+    }
+
+    //check if the player has chosen to upgrade the speed
+    public boolean isUpgradingSpeed() {
+<span class="fc" id="L52">        return this.upgradeSpeed;</span>
+    }
+
+    //check if the player has chosen to upgrade the damage
+    public boolean isUpgradingDamage() {
+<span class="fc" id="L57">        return this.upgradeDamage;</span>
+    }
+
+    //check if the player has chosen to cast a mana pool spell
+    public boolean isCastingSpell() {
+<span class="fc" id="L62">        return this.manaPoolSpell;</span>
+    }
+
+    //change the faster option of the game
+    public void setFaster(boolean faster) {
+<span class="fc" id="L67">        this.faster = faster;</span>
+<span class="fc" id="L68">    }</span>
+
+    //change the pausing option of the game
+    public void setPause(boolean pause) {
+<span class="fc" id="L72">        this.pause = pause;</span>
+<span class="fc" id="L73">    }</span>
+
+    //change the building tower option of the game
+    public void setBuildTower(boolean buildTower) {
+<span class="fc" id="L77">        this.buildTower = buildTower;</span>
+<span class="fc" id="L78">    }</span>
+
+    //change the range upgrade option of the game
+    public void setUpgradeRange(boolean upgradeRange) {
+<span class="fc" id="L82">        this.upgradeRange = upgradeRange;</span>
+<span class="fc" id="L83">    }</span>
+
+    //change the speed upgrade option of the game
+    public void setUpgradeSpeed(boolean upgradeSpeed) {
+<span class="fc" id="L87">        this.upgradeSpeed = upgradeSpeed;</span>
+<span class="fc" id="L88">    }</span>
+
+    //change the damage upgrade option of the game
+    public void setUpgradeDamage(boolean upgradeDamage) {
+<span class="fc" id="L92">        this.upgradeDamage = upgradeDamage;</span>
+<span class="fc" id="L93">    }</span>
+
+    //change the mana pool spell option of the game
+    public void setManaPoolSpell(boolean manaPoolSpell) {
+<span class="fc" id="L97">        this.manaPoolSpell = manaPoolSpell;</span>
+<span class="fc" id="L98">    }</span>
+
+    //get the spell cast to the game
+    public ManaPoolSpell getSpell() {
+<span class="fc" id="L102">        return this.spell;</span>
+    }
+
+    //update new tower in the tower attribute of the game
+    public void updateTowers(ArrayList&lt;Tower&gt; towers) {
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (Tower tower : towers) {</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (!this.towers.contains(tower)) {</span>
+<span class="fc" id="L109">                this.towers.add(tower);</span>
+            }
+<span class="fc" id="L111">        }</span>
+<span class="fc" id="L112">    }</span>
+
+    public ArrayList&lt;Tower&gt; getTowers() {
+<span class="fc" id="L115">        return this.towers;</span>
+    }
+
+    //draw th right gui
+    public void draw(PApplet app){
+<span class="nc" id="L120">        app.strokeWeight(2);</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if (this.faster) {</span>
+<span class="nc" id="L122">            app.fill(255,255,0);</span>
+<span class="nc" id="L123">            app.stroke(0);</span>
+<span class="nc" id="L124">            app.rect(650, 48, 40, 40);</span>
+<span class="nc" id="L125">            app.fill(0);</span>
+<span class="nc" id="L126">            app.textSize(25);</span>
+<span class="nc" id="L127">            app.text(&quot;FF&quot;, 655, 77);</span>
+<span class="nc" id="L128">            app.textSize(12);</span>
+<span class="nc" id="L129">            app.text(&quot;2x speed&quot;,694, 65);</span>
+        }
+<span class="nc bnc" id="L131" title="All 8 branches missed.">        else if ((app.mouseX &gt;= 650 &amp;&amp; app.mouseX &lt;= 650+40) &amp;&amp; (app.mouseY &gt;= 48 &amp;&amp; app.mouseY &lt;=48+40)) {</span>
+<span class="nc" id="L132">            app.fill(213,208,213);</span>
+<span class="nc" id="L133">            app.stroke(0);</span>
+<span class="nc" id="L134">            app.rect(650, 48, 40, 40);</span>
+<span class="nc" id="L135">            app.fill(0);</span>
+<span class="nc" id="L136">            app.textSize(25);</span>
+<span class="nc" id="L137">            app.text(&quot;FF&quot;, 655, 77);</span>
+<span class="nc" id="L138">            app.textSize(12);</span>
+<span class="nc" id="L139">            app.text(&quot;2x speed&quot;,694, 65);</span>
+        }
+        else {
+<span class="nc" id="L142">            app.noFill();</span>
+<span class="nc" id="L143">            app.stroke(0);</span>
+<span class="nc" id="L144">            app.rect(650, 48, 40, 40);</span>
+<span class="nc" id="L145">            app.fill(0);</span>
+<span class="nc" id="L146">            app.textSize(25);</span>
+<span class="nc" id="L147">            app.text(&quot;FF&quot;, 655, 77);</span>
+<span class="nc" id="L148">            app.textSize(12);</span>
+<span class="nc" id="L149">            app.text(&quot;2x speed&quot;,694, 65);</span>
+        }
+<span class="nc bnc" id="L151" title="All 2 branches missed.">        if (this.pause) {</span>
+<span class="nc" id="L152">            app.fill(255,255,0);</span>
+<span class="nc" id="L153">            app.stroke(0);</span>
+<span class="nc" id="L154">            app.rect(650, 102, 40, 40);</span>
+<span class="nc" id="L155">            app.fill(0);</span>
+<span class="nc" id="L156">            app.textSize(25);</span>
+<span class="nc" id="L157">            app.text(&quot;P&quot;, 655, 131);</span>
+<span class="nc" id="L158">            app.textSize(12);</span>
+<span class="nc" id="L159">            app.text(&quot;PAUSE&quot;,694, 119);</span>
+        }
+<span class="nc bnc" id="L161" title="All 8 branches missed.">        else if ((app.mouseX &gt;= 650 &amp;&amp; app.mouseX &lt;= 650+40) &amp;&amp; (app.mouseY &gt;= 102 &amp;&amp; app.mouseY &lt;=102+40)) {</span>
+<span class="nc" id="L162">            app.fill(213,208,213);</span>
+<span class="nc" id="L163">            app.stroke(0);</span>
+<span class="nc" id="L164">            app.rect(650, 102, 40, 40);</span>
+<span class="nc" id="L165">            app.fill(0);</span>
+<span class="nc" id="L166">            app.textSize(25);</span>
+<span class="nc" id="L167">            app.text(&quot;P&quot;, 655, 131);</span>
+<span class="nc" id="L168">            app.textSize(12);</span>
+<span class="nc" id="L169">            app.text(&quot;PAUSE&quot;,694, 119);</span>
+        }
+        else {
+<span class="nc" id="L172">            app.noFill();</span>
+<span class="nc" id="L173">            app.stroke(0);</span>
+<span class="nc" id="L174">            app.rect(650, 102, 40, 40);</span>
+<span class="nc" id="L175">            app.fill(0);</span>
+<span class="nc" id="L176">            app.textSize(25);</span>
+<span class="nc" id="L177">            app.text(&quot;P&quot;, 655, 131);</span>
+<span class="nc" id="L178">            app.textSize(12);</span>
+<span class="nc" id="L179">            app.text(&quot;PAUSE&quot;,694, 119);</span>
+        }
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        if (this.buildTower) {</span>
+<span class="nc" id="L182">            app.fill(255,255,0);</span>
+<span class="nc" id="L183">            app.stroke(0);</span>
+<span class="nc" id="L184">            app.rect(650, 156, 40, 40);</span>
+<span class="nc" id="L185">            app.fill(0);</span>
+<span class="nc" id="L186">            app.textSize(25);</span>
+<span class="nc" id="L187">            app.text(&quot;T&quot;, 655, 185);</span>
+<span class="nc" id="L188">            app.textSize(12);</span>
+<span class="nc" id="L189">            app.text(&quot;Build&quot;,694, 173);</span>
+<span class="nc" id="L190">            app.text(&quot;tower&quot;, 694, 188);</span>
+        }
+<span class="nc bnc" id="L192" title="All 8 branches missed.">        else if ((app.mouseX &gt;= 650 &amp;&amp; app.mouseX &lt;= 650+40) &amp;&amp; (app.mouseY &gt;= 156 &amp;&amp; app.mouseY &lt;=156+40)) {</span>
+<span class="nc" id="L193">            app.fill(213,208,213);</span>
+<span class="nc" id="L194">            app.stroke(0);</span>
+<span class="nc" id="L195">            app.rect(650, 156, 40, 40);</span>
+<span class="nc" id="L196">            app.fill(0);</span>
+<span class="nc" id="L197">            app.textSize(25);</span>
+<span class="nc" id="L198">            app.text(&quot;T&quot;, 655, 185);</span>
+<span class="nc" id="L199">            app.textSize(12);</span>
+<span class="nc" id="L200">            app.text(&quot;Build&quot;,694, 173);</span>
+<span class="nc" id="L201">            app.text(&quot;tower&quot;, 694, 188);</span>
+        }
+        else {
+<span class="nc" id="L204">            app.noFill();</span>
+<span class="nc" id="L205">            app.stroke(0);</span>
+<span class="nc" id="L206">            app.rect(650, 156, 40, 40);</span>
+<span class="nc" id="L207">            app.fill(0);</span>
+<span class="nc" id="L208">            app.textSize(25);</span>
+<span class="nc" id="L209">            app.text(&quot;T&quot;, 655, 185);</span>
+<span class="nc" id="L210">            app.textSize(12);</span>
+<span class="nc" id="L211">            app.text(&quot;Build&quot;,694, 173);</span>
+<span class="nc" id="L212">            app.text(&quot;tower&quot;, 694, 188);</span>
+        }
+<span class="nc bnc" id="L214" title="All 8 branches missed.">        if ((app.mouseX &gt;= 650 &amp;&amp; app.mouseX &lt;= 650+40) &amp;&amp; (app.mouseY &gt;= 156 &amp;&amp; app.mouseY &lt;=156+40)) {</span>
+<span class="nc" id="L215">            app.fill(255);</span>
+<span class="nc" id="L216">            app.strokeWeight(1);</span>
+<span class="nc" id="L217">            app.rect(575, 156, 60, 18);</span>
+<span class="nc" id="L218">            app.fill(0);</span>
+<span class="nc" id="L219">            app.textSize(12);</span>
+<span class="nc" id="L220">            boolean[] selectionCheck = new boolean[3];</span>
+<span class="nc" id="L221">            selectionCheck[0] = this.upgradeRange;</span>
+<span class="nc" id="L222">            selectionCheck[1] = this.upgradeSpeed;</span>
+<span class="nc" id="L223">            selectionCheck[2] = this.upgradeDamage;</span>
+<span class="nc" id="L224">            int trueCount = 0;</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">            for (boolean bool : selectionCheck) {</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">                if (bool) {</span>
+<span class="nc" id="L227">                    trueCount++;</span>
+                }
+            }
+<span class="nc" id="L230">            app.text(&quot;Cost: &quot; + (this.buildCost + 20 * trueCount), 577, 170);</span>
+        }
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if (this.upgradeRange) {</span>
+<span class="nc" id="L233">            app.fill(255,255,0);</span>
+<span class="nc" id="L234">            app.stroke(0);</span>
+<span class="nc" id="L235">            app.rect(650, 210, 40, 40);</span>
+<span class="nc" id="L236">            app.fill(0);</span>
+<span class="nc" id="L237">            app.textSize(25);</span>
+<span class="nc" id="L238">            app.text(&quot;U1&quot;, 655, 239);</span>
+<span class="nc" id="L239">            app.textSize(12);</span>
+<span class="nc" id="L240">            app.text(&quot;Upgrade&quot;,694, 227);</span>
+<span class="nc" id="L241">            app.text(&quot;range&quot;, 694, 242);</span>
+        }
+<span class="nc bnc" id="L243" title="All 8 branches missed.">        else if ((app.mouseX &gt;= 650 &amp;&amp; app.mouseX &lt;= 650+40) &amp;&amp; (app.mouseY &gt;= 210 &amp;&amp; app.mouseY &lt;=210+40)) {</span>
+<span class="nc" id="L244">            app.fill(213,208,213);</span>
+<span class="nc" id="L245">            app.stroke(0);</span>
+<span class="nc" id="L246">            app.rect(650, 210, 40, 40);</span>
+<span class="nc" id="L247">            app.fill(0);</span>
+<span class="nc" id="L248">            app.textSize(25);</span>
+<span class="nc" id="L249">            app.text(&quot;U1&quot;, 655, 239);</span>
+<span class="nc" id="L250">            app.textSize(12);</span>
+<span class="nc" id="L251">            app.text(&quot;Upgrade&quot;,694, 227);</span>
+<span class="nc" id="L252">            app.text(&quot;range&quot;, 694, 242);</span>
+        }
+        else {
+<span class="nc" id="L255">            app.noFill();</span>
+<span class="nc" id="L256">            app.stroke(0);</span>
+<span class="nc" id="L257">            app.rect(650, 210, 40, 40);</span>
+<span class="nc" id="L258">            app.fill(0);</span>
+<span class="nc" id="L259">            app.textSize(25);</span>
+<span class="nc" id="L260">            app.text(&quot;U1&quot;, 655, 239);</span>
+<span class="nc" id="L261">            app.textSize(12);</span>
+<span class="nc" id="L262">            app.text(&quot;Upgrade&quot;,694, 227);</span>
+<span class="nc" id="L263">            app.text(&quot;range&quot;, 694, 242);</span>
+        }
+<span class="nc bnc" id="L265" title="All 2 branches missed.">        if (this.upgradeSpeed) {</span>
+<span class="nc" id="L266">            app.fill(255,255,0);</span>
+<span class="nc" id="L267">            app.stroke(0);</span>
+<span class="nc" id="L268">            app.rect(650, 264, 40, 40);</span>
+<span class="nc" id="L269">            app.fill(0);</span>
+<span class="nc" id="L270">            app.textSize(25);</span>
+<span class="nc" id="L271">            app.text(&quot;U2&quot;, 655, 293);</span>
+<span class="nc" id="L272">            app.textSize(12);</span>
+<span class="nc" id="L273">            app.text(&quot;Upgrade&quot;,694, 281);</span>
+<span class="nc" id="L274">            app.text(&quot;speed&quot;, 694, 296);</span>
+        }
+<span class="nc bnc" id="L276" title="All 8 branches missed.">        else if ((app.mouseX &gt;= 650 &amp;&amp; app.mouseX &lt;= 650+40) &amp;&amp; (app.mouseY &gt;= 264 &amp;&amp; app.mouseY &lt;=264+40)) {</span>
+<span class="nc" id="L277">            app.fill(213,208,213);</span>
+<span class="nc" id="L278">            app.stroke(0);</span>
+<span class="nc" id="L279">            app.rect(650, 264, 40, 40);</span>
+<span class="nc" id="L280">            app.fill(0);</span>
+<span class="nc" id="L281">            app.textSize(25);</span>
+<span class="nc" id="L282">            app.text(&quot;U2&quot;, 655, 293);</span>
+<span class="nc" id="L283">            app.textSize(12);</span>
+<span class="nc" id="L284">            app.text(&quot;Upgrade&quot;,694, 281);</span>
+<span class="nc" id="L285">            app.text(&quot;speed&quot;, 694, 296);</span>
+        }
+        else {
+<span class="nc" id="L288">            app.noFill();</span>
+<span class="nc" id="L289">            app.stroke(0);</span>
+<span class="nc" id="L290">            app.rect(650, 264, 40, 40);</span>
+<span class="nc" id="L291">            app.fill(0);</span>
+<span class="nc" id="L292">            app.textSize(25);</span>
+<span class="nc" id="L293">            app.text(&quot;U2&quot;, 655, 293);</span>
+<span class="nc" id="L294">            app.textSize(12);</span>
+<span class="nc" id="L295">            app.text(&quot;Upgrade&quot;,694, 281);</span>
+<span class="nc" id="L296">            app.text(&quot;speed&quot;, 694, 296);</span>
+        }
+<span class="nc bnc" id="L298" title="All 2 branches missed.">        if (this.upgradeDamage) {</span>
+<span class="nc" id="L299">            app.fill(255,255,0);</span>
+<span class="nc" id="L300">            app.stroke(0);</span>
+<span class="nc" id="L301">            app.rect(650, 318, 40, 40);</span>
+<span class="nc" id="L302">            app.fill(0);</span>
+<span class="nc" id="L303">            app.textSize(25);</span>
+<span class="nc" id="L304">            app.text(&quot;U3&quot;, 655, 347);</span>
+<span class="nc" id="L305">            app.textSize(12);</span>
+<span class="nc" id="L306">            app.text(&quot;Upgrade&quot;,694, 335);</span>
+<span class="nc" id="L307">            app.text(&quot;damage&quot;, 694, 350);</span>
+        }
+<span class="nc bnc" id="L309" title="All 8 branches missed.">        else if ((app.mouseX &gt;= 650 &amp;&amp; app.mouseX &lt;= 650+40) &amp;&amp; (app.mouseY &gt;= 318 &amp;&amp; app.mouseY &lt;=318+40)) {</span>
+<span class="nc" id="L310">            app.fill(213,208,213);</span>
+<span class="nc" id="L311">            app.stroke(0);</span>
+<span class="nc" id="L312">            app.rect(650, 318, 40, 40);</span>
+<span class="nc" id="L313">            app.fill(0);</span>
+<span class="nc" id="L314">            app.textSize(25);</span>
+<span class="nc" id="L315">            app.text(&quot;U3&quot;, 655, 347);</span>
+<span class="nc" id="L316">            app.textSize(12);</span>
+<span class="nc" id="L317">            app.text(&quot;Upgrade&quot;,694, 335);</span>
+<span class="nc" id="L318">            app.text(&quot;damage&quot;, 694, 350);</span>
+        }
+        else {
+<span class="nc" id="L321">            app.noFill();</span>
+<span class="nc" id="L322">            app.stroke(0);</span>
+<span class="nc" id="L323">            app.rect(650, 318, 40, 40);</span>
+<span class="nc" id="L324">            app.fill(0);</span>
+<span class="nc" id="L325">            app.textSize(25);</span>
+<span class="nc" id="L326">            app.text(&quot;U3&quot;, 655, 347);</span>
+<span class="nc" id="L327">            app.textSize(12);</span>
+<span class="nc" id="L328">            app.text(&quot;Upgrade&quot;,694, 335);</span>
+<span class="nc" id="L329">            app.text(&quot;damage&quot;, 694, 350);</span>
+        }
+<span class="nc bnc" id="L331" title="All 8 branches missed.">        if ((app.mouseX &gt;= 650 &amp;&amp; app.mouseX &lt;= 650+40) &amp;&amp; (app.mouseY &gt;= 372 &amp;&amp; app.mouseY &lt;=372+40)) {</span>
+<span class="nc" id="L332">            app.fill(213,208,213);</span>
+<span class="nc" id="L333">            app.stroke(0);</span>
+<span class="nc" id="L334">            app.rect(650, 372, 40, 40);</span>
+<span class="nc" id="L335">            app.fill(0);</span>
+<span class="nc" id="L336">            app.textSize(25);</span>
+<span class="nc" id="L337">            app.text(&quot;M&quot;, 655, 401);</span>
+<span class="nc" id="L338">            app.textSize(12);</span>
+<span class="nc" id="L339">            app.text(&quot;Mana pool&quot;,694, 389);</span>
+<span class="nc" id="L340">            app.text(&quot;cost: &quot; + this.spell.getCost(), 694, 404);</span>
+        }
+        else {
+<span class="nc" id="L343">            app.noFill();</span>
+<span class="nc" id="L344">            app.stroke(0);</span>
+<span class="nc" id="L345">            app.rect(650, 372, 40, 40);</span>
+<span class="nc" id="L346">            app.fill(0);</span>
+<span class="nc" id="L347">            app.textSize(25);</span>
+<span class="nc" id="L348">            app.text(&quot;M&quot;, 655, 401);</span>
+<span class="nc" id="L349">            app.textSize(12);</span>
+<span class="nc" id="L350">            app.text(&quot;Mana pool&quot;,694, 389);</span>
+<span class="nc" id="L351">            app.text(&quot;cost: &quot; + this.spell.getCost(), 694, 404);</span>
+        }
+<span class="nc bnc" id="L353" title="All 8 branches missed.">        if ((app.mouseX &gt;= 650 &amp;&amp; app.mouseX &lt;= 650+40) &amp;&amp; (app.mouseY &gt;= 372 &amp;&amp; app.mouseY &lt;=372+40)) {</span>
+<span class="nc" id="L354">            app.fill(255);</span>
+<span class="nc" id="L355">            app.strokeWeight(1);</span>
+<span class="nc" id="L356">            app.rect(575, 372, 60, 18);</span>
+<span class="nc" id="L357">            app.fill(0);</span>
+<span class="nc" id="L358">            app.textSize(12);</span>
+<span class="nc" id="L359">            app.text(&quot;Cost: &quot; + this.spell.getCost(), 577, 386);</span>
+        }
+<span class="nc bnc" id="L361" title="All 2 branches missed.">        for (Tower tower : this.towers) {</span>
+<span class="nc bnc" id="L362" title="All 8 branches missed.">            if (app.mouseX &gt;= tower.getX() &amp;&amp; app.mouseX &lt;= tower.getX()+32 &amp;&amp; app.mouseY &gt;= tower.getY() &amp;&amp; app.mouseY &lt;= tower.getY()+32) {</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">                if (this.upgradeRange) {</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">                    if (this.upgradeSpeed) {</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">                        if (this.upgradeDamage) {</span>
+<span class="nc" id="L366">                            app.strokeWeight(1);</span>
+<span class="nc" id="L367">                            app.fill(255);</span>
+<span class="nc" id="L368">                            app.rect(650, 564, 99,22);</span>
+<span class="nc" id="L369">                            app.fill(0);</span>
+<span class="nc" id="L370">                            app.textSize(14);</span>
+<span class="nc" id="L371">                            app.text(&quot;Upgrade cost&quot;, 653, 581);</span>
+<span class="nc" id="L372">                            app.fill(255);</span>
+<span class="nc" id="L373">                            app.rect(650, 586, 99, 62);</span>
+<span class="nc" id="L374">                            app.fill(0);</span>
+<span class="nc" id="L375">                            app.textSize(14);</span>
+<span class="nc" id="L376">                            app.text(&quot;range:      &quot; + tower.getRangeCost(),653,602);</span>
+<span class="nc" id="L377">                            app.text(&quot;speed:      &quot; + tower.getSpeedCost(), 653, 622);</span>
+<span class="nc" id="L378">                            app.text(&quot;damage:   &quot; + tower.getDamageCost(), 653, 642);</span>
+<span class="nc" id="L379">                            app.fill(255);</span>
+<span class="nc" id="L380">                            app.rect(650,648,99,22);</span>
+<span class="nc" id="L381">                            app.fill(0);</span>
+<span class="nc" id="L382">                            app.textSize(14);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">                            if (tower.getDamageCost()+tower.getRangeCost()+tower.getSpeedCost() &gt;= 100) {</span>
+<span class="nc" id="L384">                                app.text(&quot;Total:      &quot; + (tower.getRangeCost() + tower.getSpeedCost() + tower.getDamageCost()), 653, 665);</span>
+                            }
+                            else {
+<span class="nc" id="L387">                                app.text(&quot;Total:       &quot; + (tower.getRangeCost() + tower.getSpeedCost() + tower.getDamageCost()), 653, 665);</span>
+                            }
+                        }
+                        else {
+<span class="nc" id="L391">                            app.strokeWeight(1);</span>
+<span class="nc" id="L392">                            app.fill(255);</span>
+<span class="nc" id="L393">                            app.rect(650, 564, 99,22);</span>
+<span class="nc" id="L394">                            app.fill(0);</span>
+<span class="nc" id="L395">                            app.textSize(14);</span>
+<span class="nc" id="L396">                            app.text(&quot;Upgrade cost&quot;, 653, 581);</span>
+<span class="nc" id="L397">                            app.fill(255);</span>
+<span class="nc" id="L398">                            app.rect(650, 586, 99, 42);</span>
+<span class="nc" id="L399">                            app.fill(0);</span>
+<span class="nc" id="L400">                            app.textSize(14);</span>
+<span class="nc" id="L401">                            app.text(&quot;range:      &quot; + tower.getRangeCost(),653,602);</span>
+<span class="nc" id="L402">                            app.text(&quot;speed:      &quot; + tower.getSpeedCost(), 653, 622);</span>
+<span class="nc" id="L403">                            app.fill(255);</span>
+<span class="nc" id="L404">                            app.rect(650,628,99,22);</span>
+<span class="nc" id="L405">                            app.fill(0);</span>
+<span class="nc" id="L406">                            app.textSize(14);</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">                            if (tower.getRangeCost()+tower.getSpeedCost() &gt;= 100) {</span>
+<span class="nc" id="L408">                                app.text(&quot;Total:      &quot; + (tower.getRangeCost() + tower.getSpeedCost()), 653, 645);</span>
+                            }
+                            else {
+<span class="nc" id="L411">                                app.text(&quot;Total:       &quot; + (tower.getRangeCost() + tower.getSpeedCost()), 653, 645);</span>
+                            }
+                        }
+                    }
+                    else {
+<span class="nc bnc" id="L416" title="All 2 branches missed.">                        if (this.upgradeDamage) {</span>
+<span class="nc" id="L417">                            app.strokeWeight(1);</span>
+<span class="nc" id="L418">                            app.fill(255);</span>
+<span class="nc" id="L419">                            app.rect(650, 564, 99,22);</span>
+<span class="nc" id="L420">                            app.fill(0);</span>
+<span class="nc" id="L421">                            app.textSize(14);</span>
+<span class="nc" id="L422">                            app.text(&quot;Upgrade cost&quot;, 653, 581);</span>
+<span class="nc" id="L423">                            app.fill(255);</span>
+<span class="nc" id="L424">                            app.rect(650, 586, 99, 42);</span>
+<span class="nc" id="L425">                            app.fill(0);</span>
+<span class="nc" id="L426">                            app.textSize(14);</span>
+<span class="nc" id="L427">                            app.text(&quot;range:      &quot; + tower.getRangeCost(),653,602);</span>
+<span class="nc" id="L428">                            app.text(&quot;damage:   &quot; + tower.getDamageCost(), 653, 622);</span>
+<span class="nc" id="L429">                            app.fill(255);</span>
+<span class="nc" id="L430">                            app.rect(650,628,99,22);</span>
+<span class="nc" id="L431">                            app.fill(0);</span>
+<span class="nc" id="L432">                            app.textSize(14);</span>
+<span class="nc bnc" id="L433" title="All 2 branches missed.">                            if (tower.getDamageCost()+tower.getRangeCost() &gt;= 100) {</span>
+<span class="nc" id="L434">                                app.text(&quot;Total:      &quot; + (tower.getRangeCost() + tower.getDamageCost()), 653, 645);</span>
+                            }
+                            else {
+<span class="nc" id="L437">                                app.text(&quot;Total:       &quot; + (tower.getRangeCost() + tower.getDamageCost()), 653, 645);</span>
+                            }
+                        }
+                        else {
+<span class="nc" id="L441">                            app.strokeWeight(1);</span>
+<span class="nc" id="L442">                            app.fill(255);</span>
+<span class="nc" id="L443">                            app.rect(650, 564, 99,22);</span>
+<span class="nc" id="L444">                            app.fill(0);</span>
+<span class="nc" id="L445">                            app.textSize(14);</span>
+<span class="nc" id="L446">                            app.text(&quot;Upgrade cost&quot;, 653, 581);</span>
+<span class="nc" id="L447">                            app.fill(255);</span>
+<span class="nc" id="L448">                            app.rect(650, 586, 99, 22);</span>
+<span class="nc" id="L449">                            app.fill(0);</span>
+<span class="nc" id="L450">                            app.textSize(14);</span>
+<span class="nc" id="L451">                            app.text(&quot;range:      &quot; + tower.getRangeCost(),653,602);</span>
+<span class="nc" id="L452">                            app.fill(255);</span>
+<span class="nc" id="L453">                            app.rect(650,608,99,22);</span>
+<span class="nc" id="L454">                            app.fill(0);</span>
+<span class="nc" id="L455">                            app.textSize(14);</span>
+<span class="nc bnc" id="L456" title="All 2 branches missed.">                            if (tower.getRangeCost() &gt;= 100) {</span>
+<span class="nc" id="L457">                                app.text(&quot;Total:      &quot; + tower.getRangeCost(), 653, 625);</span>
+                            }
+                            else {
+<span class="nc" id="L460">                                app.text(&quot;Total:       &quot; + tower.getRangeCost(), 653, 625);</span>
+                            }
+                        }
+                    }
+                }
+                else {
+<span class="nc bnc" id="L466" title="All 2 branches missed.">                    if (this.upgradeSpeed) {</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">                        if (this.upgradeDamage) {</span>
+<span class="nc" id="L468">                            app.strokeWeight(1);</span>
+<span class="nc" id="L469">                            app.fill(255);</span>
+<span class="nc" id="L470">                            app.rect(650, 564, 99,22);</span>
+<span class="nc" id="L471">                            app.fill(0);</span>
+<span class="nc" id="L472">                            app.textSize(14);</span>
+<span class="nc" id="L473">                            app.text(&quot;Upgrade cost&quot;, 653, 581);</span>
+<span class="nc" id="L474">                            app.fill(255);</span>
+<span class="nc" id="L475">                            app.rect(650, 586, 99, 42);</span>
+<span class="nc" id="L476">                            app.fill(0);</span>
+<span class="nc" id="L477">                            app.textSize(14);</span>
+<span class="nc" id="L478">                            app.text(&quot;speed:      &quot; + tower.getSpeedCost(),653,602);</span>
+<span class="nc" id="L479">                            app.text(&quot;damage:   &quot; + tower.getDamageCost(), 653, 622);</span>
+<span class="nc" id="L480">                            app.fill(255);</span>
+<span class="nc" id="L481">                            app.rect(650,628,99,22);</span>
+<span class="nc" id="L482">                            app.fill(0);</span>
+<span class="nc" id="L483">                            app.textSize(14);</span>
+<span class="nc bnc" id="L484" title="All 2 branches missed.">                            if (tower.getDamageCost()+tower.getSpeedCost() &gt;= 100) {</span>
+<span class="nc" id="L485">                                app.text(&quot;Total:      &quot; + (tower.getSpeedCost() + tower.getDamageCost()), 653, 645);</span>
+                            }
+                            else {
+<span class="nc" id="L488">                                app.text(&quot;Total:       &quot; + (tower.getSpeedCost() + tower.getDamageCost()), 653, 645);</span>
+                            }
+                        }
+                        else {
+<span class="nc" id="L492">                            app.strokeWeight(1);</span>
+<span class="nc" id="L493">                            app.fill(255);</span>
+<span class="nc" id="L494">                            app.rect(650, 564, 99,22);</span>
+<span class="nc" id="L495">                            app.fill(0);</span>
+<span class="nc" id="L496">                            app.textSize(14);</span>
+<span class="nc" id="L497">                            app.text(&quot;Upgrade cost&quot;, 653, 581);</span>
+<span class="nc" id="L498">                            app.fill(255);</span>
+<span class="nc" id="L499">                            app.rect(650, 586, 99, 22);</span>
+<span class="nc" id="L500">                            app.fill(0);</span>
+<span class="nc" id="L501">                            app.textSize(14);</span>
+<span class="nc" id="L502">                            app.text(&quot;speed:      &quot; + tower.getSpeedCost(),653,602);</span>
+<span class="nc" id="L503">                            app.fill(255);</span>
+<span class="nc" id="L504">                            app.rect(650,608,99,22);</span>
+<span class="nc" id="L505">                            app.fill(0);</span>
+<span class="nc" id="L506">                            app.textSize(14);</span>
+<span class="nc bnc" id="L507" title="All 2 branches missed.">                            if (tower.getSpeedCost() &gt;= 100) {</span>
+<span class="nc" id="L508">                                app.text(&quot;Total:      &quot; + tower.getSpeedCost(), 653, 625);</span>
+                            }
+                            else {
+<span class="nc" id="L511">                                app.text(&quot;Total:       &quot; + tower.getSpeedCost(), 653, 625);</span>
+                            }
+                        }
+                    }
+                    else {
+<span class="nc bnc" id="L516" title="All 2 branches missed.">                        if (this.upgradeDamage) {</span>
+<span class="nc" id="L517">                            app.strokeWeight(1);</span>
+<span class="nc" id="L518">                            app.fill(255);</span>
+<span class="nc" id="L519">                            app.rect(650, 564, 99,22);</span>
+<span class="nc" id="L520">                            app.fill(0);</span>
+<span class="nc" id="L521">                            app.textSize(14);</span>
+<span class="nc" id="L522">                            app.text(&quot;Upgrade cost&quot;, 653, 581);</span>
+<span class="nc" id="L523">                            app.fill(255);</span>
+<span class="nc" id="L524">                            app.rect(650, 586, 99, 22);</span>
+<span class="nc" id="L525">                            app.fill(0);</span>
+<span class="nc" id="L526">                            app.textSize(14);</span>
+<span class="nc" id="L527">                            app.text(&quot;damage:   &quot; + tower.getDamageCost(),653,602);</span>
+<span class="nc" id="L528">                            app.fill(255);</span>
+<span class="nc" id="L529">                            app.rect(650,608,99,22);</span>
+<span class="nc" id="L530">                            app.fill(0);</span>
+<span class="nc" id="L531">                            app.textSize(14);</span>
+<span class="nc bnc" id="L532" title="All 2 branches missed.">                            if (tower.getDamageCost() &gt;= 100) {</span>
+<span class="nc" id="L533">                                app.text(&quot;Total:      &quot; + tower.getDamageCost(), 653, 625);</span>
+                            }
+                            else {
+<span class="nc" id="L536">                                app.text(&quot;Total:       &quot; + tower.getDamageCost(), 653, 625);</span>
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+<span class="nc" id="L543">        }</span>
+<span class="nc" id="L544">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

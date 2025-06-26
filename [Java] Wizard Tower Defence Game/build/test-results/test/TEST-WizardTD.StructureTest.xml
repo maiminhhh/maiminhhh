@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="WizardTD.StructureTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2025-04-23T17:54:26" hostname="maiminhhh.shared.sydney.edu.au" time="0.019">
+  <properties/>
+  <testcase name="testWizardHouseConstruction()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testGrassConstruction()" classname="WizardTD.StructureTest" time="0.0"/>
+  <testcase name="testPathRow19Construction()" classname="WizardTD.StructureTest" time="0.0"/>
+  <testcase name="testSetG()" classname="WizardTD.StructureTest" time="0.0"/>
+  <testcase name="testSetH()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testPathCol19Construction()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testPathRow0Construction()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testSetParent()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testSetBuildable()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testPathConstruction()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testPathCol0Construction()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testSetBack()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testShrubConstruction()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testSetAbove()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testSetBelow()" classname="WizardTD.StructureTest" time="0.001"/>
+  <testcase name="testSetFront()" classname="WizardTD.StructureTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

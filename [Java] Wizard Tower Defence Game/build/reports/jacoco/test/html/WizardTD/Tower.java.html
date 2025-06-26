@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tower.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">scaffold</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Tower.java</span></div><h1>Tower.java</h1><pre class="source lang-java linenums">package WizardTD;
+import processing.core.PApplet;
+import processing.core.PImage;
+import java.util.ArrayList;
+import java.util.Random;
+public class Tower extends StaticGraphics {
+    //class attributes
+<span class="fc" id="L8">    private int rangeCost = 20;</span>
+<span class="fc" id="L9">    private int speedCost = 20;</span>
+<span class="fc" id="L10">    private int damageCost = 20;</span>
+    private int buildCost;
+    private float range;
+    private float speed;
+    private int damage;
+<span class="fc" id="L15">    private int rangeLvGraphed = 0;</span>
+<span class="fc" id="L16">    private int speedLvGraphed = 0;</span>
+<span class="fc" id="L17">    private int damageLvGraphed = 0;</span>
+<span class="fc" id="L18">    private int allLv = 1;</span>
+    private int centerX;
+    private int centerY;
+    private int initialDamage;
+<span class="fc" id="L22">    private ArrayList&lt;FireBall&gt; fireBalls = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L23">    private ArrayList&lt;Monsters&gt; enemiesInRange = new ArrayList&lt;&gt;();</span>
+    private Monsters target;
+
+    //constructor method
+    public Tower(int initialTowerCost, float initialTowerRange, float initialTowerFiringSpeed, int initialTowerDamage, int x, int y) {
+<span class="fc" id="L28">        super(x,y);</span>
+<span class="fc" id="L29">        this.buildCost = initialTowerCost;</span>
+<span class="fc" id="L30">        this.range = initialTowerRange;</span>
+<span class="fc" id="L31">        this.damage = initialTowerDamage;</span>
+<span class="fc" id="L32">        this.initialDamage = initialTowerDamage;</span>
+<span class="fc" id="L33">        this.speed = initialTowerFiringSpeed;</span>
+<span class="fc" id="L34">        this.centerX = x + 16;</span>
+<span class="fc" id="L35">        this.centerY = y + 16;</span>
+<span class="fc" id="L36">    }</span>
+
+    public float getSpeed() {
+<span class="fc" id="L39">        return this.speed;</span>
+    }
+
+    public float getRange() {
+<span class="fc" id="L43">        return this.range;</span>
+    }
+
+    //get the amount of damage received by the monster
+    public int getDamage(){
+<span class="fc" id="L48">        return this.damage;</span>
+    }
+
+    //get the cost for upgrading this tower's range
+    public int getRangeCost() {
+<span class="fc" id="L53">        return this.rangeCost;</span>
+    }
+
+    // get the cost for upgrading this tower's speed
+    public int getSpeedCost() {
+<span class="fc" id="L58">        return this.speedCost;</span>
+    }
+
+    //get the cost for upgrading this tower's damage
+    public int getDamageCost(){
+<span class="fc" id="L63">        return this.damageCost;</span>
+    }
+
+    //get the cost for building the tower
+    public int getBuildCost() {
+<span class="fc" id="L68">        return this.buildCost;</span>
+    }
+
+    public void upgradeAllLv() {
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (this.allLv &lt;= 3) {</span>
+<span class="fc" id="L73">            Integer[] levelGraphed = new Integer[3];</span>
+<span class="fc" id="L74">            levelGraphed[0] = this.rangeLvGraphed;</span>
+<span class="fc" id="L75">            levelGraphed[1] = this.speedLvGraphed;</span>
+<span class="fc" id="L76">            levelGraphed[2] = this.damageLvGraphed;</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">            for (int i = 0; i &lt; levelGraphed.length; i++) {</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">                if (levelGraphed[i] == 0) {</span>
+<span class="fc" id="L79">                    return;</span>
+                }
+            }
+<span class="fc" id="L82">            this.rangeLvGraphed --;</span>
+<span class="fc" id="L83">            this.speedLvGraphed --;</span>
+<span class="fc" id="L84">            this.damageLvGraphed --;</span>
+<span class="fc" id="L85">            this.allLv++;</span>
+        }
+<span class="fc" id="L87">    }</span>
+
+    //upgrade the range of the tower
+    public void upgradeRange() {
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (this.rangeLvGraphed &lt; 5) {</span>
+<span class="fc" id="L92">            this.rangeLvGraphed++;</span>
+<span class="fc" id="L93">            this.range += 32;</span>
+<span class="fc" id="L94">            this.rangeCost += 10;</span>
+        }
+<span class="fc" id="L96">        this.upgradeAllLv();</span>
+<span class="fc" id="L97">    }</span>
+
+    //upgrade the speed of the tower
+    public void upgradeSpeed() {
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        if (this.speedLvGraphed &lt; 5) {</span>
+<span class="fc" id="L102">            this.speed += 0.5;</span>
+<span class="fc" id="L103">            this.speedLvGraphed += 1;</span>
+<span class="fc" id="L104">            this.speedCost += 10;</span>
+        }
+<span class="fc" id="L106">        this.upgradeAllLv();</span>
+<span class="fc" id="L107">    }</span>
+
+    //upgrade the damage of the tower
+    public void upgradeDamage() {
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if (this.damageLvGraphed &lt; 5) {</span>
+<span class="fc" id="L112">            this.damage += this.initialDamage*0.5;</span>
+<span class="fc" id="L113">            this.damageLvGraphed += 1;</span>
+<span class="fc" id="L114">            this.damageCost += 10;</span>
+        }
+<span class="fc" id="L116">        this.upgradeAllLv();</span>
+<span class="fc" id="L117">    }</span>
+
+    //get a list of all fireballs to be generated
+    public ArrayList&lt;FireBall&gt; getFireBalls() {
+<span class="fc" id="L121">        return this.fireBalls;</span>
+    }
+
+    //get the enemies within the tower's range
+    public ArrayList&lt;Monsters&gt; getEnemiesInRange() {
+<span class="fc" id="L126">        return this.enemiesInRange;</span>
+    }
+
+    //get the center x-coordinate of the tower
+    public int getCenterX() {
+<span class="fc" id="L131">        return this.centerX;</span>
+    }
+
+    //get the center y-coorinate of the tower
+    public int getCenterY() {
+<span class="fc" id="L136">        return this.centerY;</span>
+    }
+
+    public int getAllLv() {
+<span class="fc" id="L140">        return this.allLv;</span>
+    }
+
+    public int getRangeLvGraphed() {
+<span class="fc" id="L144">        return this.rangeLvGraphed;</span>
+    }
+
+    public int getSpeedLvGraphed() {
+<span class="fc" id="L148">        return this.speedLvGraphed;</span>
+    }
+
+    public int getDamageLvGraphed() {
+<span class="fc" id="L152">        return this.damageLvGraphed;</span>
+    }
+
+    //check which enemies is in the range of this tower's range
+    public void setEnemiesInRange(ArrayList&lt;Monsters&gt; monsters) {
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (monsters!=null) {</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">            for (Monsters monster : monsters) {</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">                if (monster.getSprite() != null) {</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">                    if (!monster.isDisappear()) {</span>
+<span class="fc" id="L161">                        float monsterCenterX = monster.getX() + (float) (monster.getSprite().pixelWidth / 2);</span>
+<span class="fc" id="L162">                        float monsterCenterY = monster.getY() + (float) (monster.getSprite().pixelHeight / 2);</span>
+<span class="fc" id="L163">                        float deltaX = this.centerX - monsterCenterX;</span>
+<span class="fc" id="L164">                        float deltaY = this.centerY - monsterCenterY;</span>
+<span class="fc" id="L165">                        float distance = (float) (Math.sqrt(deltaX * deltaX + deltaY * deltaY));</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">                        if (distance &lt; this.range) {</span>
+<span class="fc" id="L167">                            this.enemiesInRange.add(monster);</span>
+                        }
+                    }
+                }
+<span class="fc" id="L171">            }</span>
+        }
+<span class="fc" id="L173">    }</span>
+
+    //randomly pick a target in the list of all enemies in range
+    public void setTarget() {
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        if (this.getEnemiesInRange().size() == 0) {</span>
+<span class="fc" id="L178">            this.target = null;</span>
+        }
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        else if (this.getEnemiesInRange().size() == 1) {</span>
+<span class="fc" id="L181">            this.target = this.getEnemiesInRange().get(0);</span>
+        }
+        else {
+<span class="fc" id="L184">            Random rand = new Random();</span>
+<span class="fc" id="L185">            int targetIndex = rand.nextInt(this.getEnemiesInRange().size());</span>
+<span class="fc" id="L186">            this.target = this.getEnemiesInRange().get(targetIndex);</span>
+        }
+<span class="fc" id="L188">    }</span>
+
+    //get the target of the tower
+    public Monsters getTarget() {
+<span class="fc" id="L192">        return this.target;</span>
+    }
+
+    //generate the fireballs based on listed condition
+    public void generateFireBall(int currentFrame, float gameSpeed, PImage fireBallSprite) {
+<span class="fc bfc" id="L197" title="All 2 branches covered.">        if (this.enemiesInRange.size() != 0) {</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">            if (this.fireBalls.size() == 0) {</span>
+<span class="fc" id="L199">                this.fireBalls.add(new FireBall(this, currentFrame, fireBallSprite));</span>
+            }
+            else {
+<span class="fc" id="L202">                int previousFrame = this.fireBalls.get(this.fireBalls.size()-1).getShootingFrame();</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">                if (currentFrame - previousFrame &gt;= 60/(this.speed*gameSpeed)){</span>
+<span class="fc" id="L204">                    this.fireBalls.add(new FireBall(this, currentFrame, fireBallSprite));</span>
+                }
+            }
+        }
+<span class="fc" id="L208">    }</span>
+
+    public void setAllLv(int allLv) {
+<span class="fc" id="L211">        this.allLv = allLv;</span>
+<span class="fc" id="L212">    }</span>
+
+    //clear all the enemies in range
+    public void resetEnemiesInRange() {
+<span class="fc" id="L216">        this.enemiesInRange.clear();</span>
+<span class="fc" id="L217">    }</span>
+
+    public void setSprite(PImage tower0, PImage tower1, PImage tower2) {
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        if (this.allLv == 1) {</span>
+<span class="fc" id="L221">            this.setSprite(tower0);</span>
+        }
+<span class="fc bfc" id="L223" title="All 2 branches covered.">        else if (this.allLv == 2) {</span>
+<span class="fc" id="L224">            this.setSprite(tower1);</span>
+        }
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        else if (this.allLv &gt;= 3) {</span>
+<span class="fc" id="L227">            this.setSprite(tower2);</span>
+        }
+<span class="fc" id="L229">    }</span>
+
+    //draw the tower
+    public void draw(PApplet app) {
+<span class="nc" id="L233">        app.image(this.sprite, this.x, this.y);</span>
+<span class="nc" id="L234">    }</span>
+
+    public void drawSign(PApplet app) {
+<span class="nc" id="L237">        int distanceBetweenSign = 6;</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        if (this.damageLvGraphed != 0) {</span>
+<span class="nc" id="L239">            app.noFill();</span>
+<span class="nc" id="L240">            app.stroke(123,181,255);</span>
+<span class="nc" id="L241">            app.strokeWeight(1+this.damageLvGraphed);</span>
+<span class="nc" id="L242">            app.rect(this.x+6, this.y+6, 20,20);</span>
+        }
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        for (int i = 0; i &lt; this.rangeLvGraphed; i++) {</span>
+<span class="nc" id="L245">            app.fill(176,47,182);</span>
+<span class="nc" id="L246">            app.textSize(10);</span>
+<span class="nc" id="L247">            app.text(&quot;O&quot;, this.x+i*distanceBetweenSign, this.y+8);</span>
+        }
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        for (int i = 0; i &lt; this.speedLvGraphed; i++) {</span>
+<span class="nc" id="L250">            app.fill(176, 47, 182);</span>
+<span class="nc" id="L251">            app.textSize(10);</span>
+<span class="nc" id="L252">            app.text(&quot;X&quot;, this.x+i*distanceBetweenSign, this.y + 32);</span>
+        }
+<span class="nc bnc" id="L254" title="All 8 branches missed.">        if (app.mouseX &gt; this.x &amp;&amp; app.mouseX &lt; this.x+sprite.pixelWidth &amp;&amp; app.mouseY &gt; this.y &amp;&amp; app.mouseY &lt; this.y + sprite.pixelHeight) {</span>
+<span class="nc" id="L255">            app.noFill();</span>
+<span class="nc" id="L256">            app.stroke(255,255,0);</span>
+<span class="nc" id="L257">            app.strokeWeight(2);</span>
+<span class="nc" id="L258">            app.ellipse(this.x+(float)(sprite.pixelWidth/2), this.y+(float) (sprite.pixelHeight/2), this.range*2, this.range*2);</span>
+        }
+<span class="nc" id="L260">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

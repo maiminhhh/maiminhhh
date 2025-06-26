@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Wizard.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">scaffold</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Wizard.java</span></div><h1>Wizard.java</h1><pre class="source lang-java linenums">package WizardTD;
+public class Wizard {
+    private int mana;
+    private int manaCap;
+    final private int manaGainedPerSec;
+<span class="fc" id="L6">    public Wizard(int initialMana, int initialManaCap, int initialManaGainedPerSec) {</span>
+<span class="fc" id="L7">        this.mana = initialMana;</span>
+<span class="fc" id="L8">        this.manaCap = initialManaCap;</span>
+<span class="fc" id="L9">        this.manaGainedPerSec = initialManaGainedPerSec;</span>
+<span class="fc" id="L10">    }</span>
+    public void timePassed() {
+<span class="fc" id="L12">        this.mana += this.manaGainedPerSec;</span>
+<span class="fc bfc" id="L13" title="All 2 branches covered.">        if (this.mana &gt;= this.manaCap) {</span>
+<span class="fc" id="L14">            this.mana = this.manaCap;</span>
+        }
+<span class="fc" id="L16">    }</span>
+    public int getMana() {
+<span class="fc" id="L18">        return this.mana;</span>
+    }
+    public int getManaCap() {
+<span class="fc" id="L21">        return this.manaCap;</span>
+    }
+    public void monsterDamaged(Monsters monster) {
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (monster != null) {</span>
+<span class="fc" id="L25">            this.mana -= monster.getCurrentHp();</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">            if (this.mana &lt;= 0) {</span>
+<span class="fc" id="L27">                this.mana = 0;</span>
+            }
+        }
+<span class="fc" id="L30">    }</span>
+    public void castSpell(int spellCost) {
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (this.mana &gt; spellCost) {</span>
+<span class="fc" id="L33">            this.mana -= spellCost;</span>
+        }
+<span class="fc" id="L35">    }</span>
+    public void buildTower(Tower tower) {
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (tower != null) {</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">            if (this.mana &gt; tower.getBuildCost()) {</span>
+<span class="fc" id="L39">                this.mana -= tower.getBuildCost();</span>
+            }
+        }
+<span class="fc" id="L42">    }</span>
+    public void upgradeRange(Tower tower) {
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (tower!=null) {</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">            if (this.mana &gt; tower.getRangeCost()) {</span>
+<span class="fc" id="L46">                this.mana -= tower.getRangeCost();</span>
+<span class="fc" id="L47">                tower.upgradeRange();</span>
+            }
+        }
+<span class="fc" id="L50">    }</span>
+    public void upgradeSpeed(Tower tower) {
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if (tower!=null) {</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">            if (this.mana &gt; tower.getSpeedCost()) {</span>
+<span class="fc" id="L54">                this.mana -= tower.getSpeedCost();</span>
+<span class="fc" id="L55">                tower.upgradeSpeed();</span>
+            }
+        }
+<span class="fc" id="L58">    }</span>
+    public void upgradeDamage(Tower tower) {
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (this.mana &gt; tower.getDamageCost()) {</span>
+<span class="fc" id="L61">            this.mana -= tower.getDamageCost();</span>
+<span class="fc" id="L62">            tower.upgradeDamage();</span>
+        }
+<span class="fc" id="L64">    }</span>
+    public void manaGainedOnKill(int manaGainedOnKill) {
+<span class="fc" id="L66">        this.mana += manaGainedOnKill;</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (this.mana &gt;= this.manaCap) {</span>
+<span class="fc" id="L68">            this.mana -= (this.mana - this.manaCap);</span>
+        }
+<span class="fc" id="L70">    }</span>
+    public void setManaCap(int manaCap) {
+<span class="fc" id="L72">        this.manaCap = manaCap;</span>
+<span class="fc" id="L73">    }</span>
+    public int getManaGainedPerSec() {
+<span class="fc" id="L75">        return this.manaGainedPerSec;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

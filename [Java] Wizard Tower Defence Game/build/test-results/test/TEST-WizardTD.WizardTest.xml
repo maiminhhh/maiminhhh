@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="WizardTD.WizardTest" tests="23" skipped="0" failures="0" errors="0" timestamp="2025-04-23T17:54:26" hostname="maiminhhh.shared.sydney.edu.au" time="0.02">
+  <properties/>
+  <testcase name="testUpgradeRangeNullTower()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testManaGainedOnKillExactlyMaxMana()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testCastSpellEnoughMana()" classname="WizardTD.WizardTest" time="0.001"/>
+  <testcase name="testMonsterDamagedWithInvalidMonster()" classname="WizardTD.WizardTest" time="0.001"/>
+  <testcase name="testMonsterDamagedWithMonsterHpLargerThanTowerMana()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testSetManaCap()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testConstruction()" classname="WizardTD.WizardTest" time="0.001"/>
+  <testcase name="testUpgradeRangeEnoughMana()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testManaGainedOnKill()" classname="WizardTD.WizardTest" time="0.001"/>
+  <testcase name="testTimePassedWith1FramePassed()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testUpgradeSpeedNullTower()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testMonsterDamagedWithValidMonster()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testUpgradeDamageNotEnoughMana()" classname="WizardTD.WizardTest" time="0.001"/>
+  <testcase name="testManaGainedOnKillExceedMaxMana()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testTimePassedFullMana()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testBuildTowerEnoughMana()" classname="WizardTD.WizardTest" time="0.001"/>
+  <testcase name="testCastSpellNotEnoughMana()" classname="WizardTD.WizardTest" time="0.001"/>
+  <testcase name="testUpgradeSpeedNotEnoughMana()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testUpgradeRangeNotEnoughMana()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testBuildTowerInvalidTower()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testUpgradeDamageEnoughMana()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testBuildTowerNotEnoughMana()" classname="WizardTD.WizardTest" time="0.0"/>
+  <testcase name="testUpgradeSpeedEnoughMana()" classname="WizardTD.WizardTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

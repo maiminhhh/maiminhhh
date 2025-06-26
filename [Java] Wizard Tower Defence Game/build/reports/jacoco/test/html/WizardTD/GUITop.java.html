@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GUITop.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">scaffold</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">GUITop.java</span></div><h1>GUITop.java</h1><pre class="source lang-java linenums">package WizardTD;
+import java.util.*;
+import java.lang.*;
+import processing.data.JSONArray;
+import processing.data.JSONObject;
+import processing.core.PApplet;
+import processing.core.PImage;
+public class GUITop {
+    //class attributes
+    final private JSONArray wavesJSONArray;
+    private ArrayList&lt;Waves&gt; waves;
+    private Waves waitingWave;
+    private Waves lastWave;
+    private int waveCount;
+    private float timer;
+    private Wizard wizardHouse;
+
+    //constructor method
+<span class="fc" id="L19">    public GUITop(JSONArray wavesJSONArray, Wizard wizardHouse){</span>
+<span class="fc" id="L20">        this.wavesJSONArray = wavesJSONArray;</span>
+<span class="fc" id="L21">        this.waves = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L22">        this.waveCount = 0;</span>
+<span class="fc" id="L23">        this.wizardHouse = wizardHouse;</span>
+<span class="fc" id="L24">    }</span>
+
+    //get a list of all the waves
+    public ArrayList&lt;Waves&gt; getWaves() {
+<span class="fc" id="L28">        return this.waves;</span>
+    }
+
+    //get the waiting wave
+    public Waves getWaitingWave() {
+<span class="fc" id="L33">        return this.waitingWave;</span>
+    }
+
+    //get the previous wave
+    public Waves getLastWave() {
+<span class="fc" id="L38">        return this.lastWave;</span>
+    }
+
+    //get the current wave index
+    public int getWaveCount() {
+<span class="fc" id="L43">        return this.waveCount;</span>
+    }
+
+    //add the waves with the information stored in the JSONArray into the list of waves in the class attributes
+    public void addWaves(PImage beetleImage, PImage gremlinImage, PImage wormImage){
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        for (int i=0; i &lt; this.wavesJSONArray.size(); i++) {</span>
+<span class="fc" id="L49">            JSONObject waveJSONObject = (JSONObject) this.wavesJSONArray.get(i);</span>
+<span class="fc" id="L50">            float duration = waveJSONObject.getFloat(&quot;duration&quot;);</span>
+<span class="fc" id="L51">            float preWavePause = waveJSONObject.getFloat(&quot;pre_wave_pause&quot;);</span>
+<span class="fc" id="L52">            JSONArray monstersJSONArray = (JSONArray) waveJSONObject.get(&quot;monsters&quot;);</span>
+<span class="fc" id="L53">            ArrayList&lt;Monsters&gt; monsters = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            if (monstersJSONArray!=null) {</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">                for (int m=0; m&lt;monstersJSONArray.size(); m++) {</span>
+<span class="fc" id="L56">                    JSONObject monsterJSONObject = (JSONObject) monstersJSONArray.get(m);</span>
+<span class="fc" id="L57">                    String type = monsterJSONObject.getString(&quot;type&quot;);</span>
+<span class="fc" id="L58">                    float hp = monsterJSONObject.getFloat(&quot;hp&quot;);</span>
+<span class="fc" id="L59">                    float speed = monsterJSONObject.getFloat(&quot;speed&quot;);</span>
+<span class="fc" id="L60">                    float armour = monsterJSONObject.getFloat(&quot;armour&quot;);</span>
+<span class="fc" id="L61">                    int manaGainedOnKill = monsterJSONObject.getInt(&quot;mana_gained_on_kill&quot;);</span>
+<span class="fc" id="L62">                    int quantity = monsterJSONObject.getInt(&quot;quantity&quot;);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">                    if (type.equals(&quot;beetle&quot;)) {</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">                        for (int times = 0; times &lt; quantity; times++) {</span>
+<span class="fc" id="L65">                            monsters.add(new Monsters(beetleImage, hp, speed, armour, manaGainedOnKill));</span>
+                        }
+<span class="fc bfc" id="L67" title="All 2 branches covered.">                    } else if (type.equals(&quot;gremlin&quot;)) {</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">                        for (int times = 0; times &lt; quantity; times++) {</span>
+<span class="fc" id="L69">                            monsters.add(new Monsters(gremlinImage, hp, speed, armour, manaGainedOnKill));</span>
+                        }
+<span class="fc bfc" id="L71" title="All 2 branches covered.">                    } else if (type.equals(&quot;worm&quot;)) {</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">                        for (int times = 0; times &lt; quantity; times++) {</span>
+<span class="fc" id="L73">                            monsters.add(new Monsters(wormImage, hp, speed, armour, manaGainedOnKill));</span>
+                        }
+                    }
+                }
+            }
+<span class="fc" id="L78">            Collections.shuffle(monsters);</span>
+<span class="fc" id="L79">            this.waves.add(new Waves(preWavePause, duration, monsters));</span>
+        }
+<span class="fc" id="L81">        this.waitingWave = this.waves.get(this.waveCount);</span>
+<span class="fc" id="L82">        this.lastWave = new Waves(0,0,null);</span>
+<span class="fc" id="L83">        this.timer = (float) this.waitingWave.getPreWavePause();</span>
+<span class="fc" id="L84">    }</span>
+
+    public float getTimer() {
+<span class="fc" id="L87">        return this.timer;</span>
+    }
+    //calculate the waiting time for the next wave
+    public void setTimer() {
+<span class="fc" id="L91">        this.timer = (float) (waitingWave.getPreWavePause() + lastWave.getDuration());</span>
+<span class="fc" id="L92">    }</span>
+
+    //what would happen if 1 frame passed
+    public void tick() {
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if (this.waveCount == this.waves.size()-1) {</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">            if (this.timer == 0) {</span>
+<span class="fc" id="L98">                this.waveCount += 1;</span>
+            }
+        }
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        if (this.waveCount == 0) {</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">            if (this.waitingWave.getPreWavePause()&gt;0) {</span>
+<span class="fc" id="L103">                this.waitingWave.preWaveTimePassed();</span>
+            }
+<span class="fc bfc" id="L105" title="All 2 branches covered.">            if (this.waitingWave.getPreWavePause()&lt;=0) {</span>
+<span class="fc" id="L106">                this.waitingWave.setPrewavePause(0);</span>
+            }
+        }
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        else if (this.waveCount &lt; this.waves.size()) {</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">            if (this.lastWave.getDuration()&gt;0) {</span>
+<span class="fc" id="L111">                this.lastWave.timePassed();</span>
+            }
+            else {
+<span class="fc bfc" id="L114" title="All 2 branches covered.">                if (this.waitingWave.getPreWavePause()&gt;0) {</span>
+<span class="fc" id="L115">                    this.waitingWave.preWaveTimePassed();</span>
+                }
+            }
+        }
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if ((int) this.timer == 0) {</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">            if (this.waveCount &lt; this.waves.size()-1) {</span>
+<span class="fc" id="L121">                this.waveCount += 1;</span>
+<span class="fc" id="L122">                this.waitingWave = this.waves.get(this.waveCount);</span>
+<span class="fc" id="L123">                this.lastWave = this.waves.get(this.waveCount - 1);</span>
+            }
+        }
+<span class="fc" id="L126">        this.setTimer();</span>
+<span class="fc" id="L127">    }</span>
+
+    //draw the top gui
+    public void draw(PApplet app) {
+<span class="nc" id="L131">        app.background(135, 114, 68);</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (this.waveCount &lt; this.waves.size()){</span>
+<span class="nc" id="L133">            app.fill(0);</span>
+<span class="nc" id="L134">            String timerNoti = &quot;Wave &quot; + (this.waveCount + 1) + &quot; starts: &quot; + (int) this.timer;</span>
+<span class="nc" id="L135">            app.textSize(23);</span>
+<span class="nc" id="L136">            app.text(timerNoti, 10, 30);</span>
+        }
+<span class="nc" id="L138">        app.strokeWeight(2);</span>
+<span class="nc" id="L139">        app.fill(0);</span>
+<span class="nc" id="L140">        app.textSize(21);</span>
+<span class="nc" id="L141">        String mana = &quot;MANA: &quot;;</span>
+<span class="nc" id="L142">        app.text(mana, 310, 30);</span>
+<span class="nc" id="L143">        float barWidth = 320;</span>
+<span class="nc" id="L144">        app.stroke(0);</span>
+<span class="nc" id="L145">        app.fill(255, 255, 255);</span>
+<span class="nc" id="L146">        app.rect(385, 10, barWidth, 22);</span>
+<span class="nc" id="L147">        app.fill(0, 218, 216);</span>
+<span class="nc" id="L148">        app.stroke(0);</span>
+<span class="nc" id="L149">        app.rect(385, 10, (float) this.wizardHouse.getMana()/this.wizardHouse.getManaCap() * barWidth, 22);</span>
+<span class="nc" id="L150">        app.fill(0);</span>
+<span class="nc" id="L151">        app.textSize(20);</span>
+<span class="nc" id="L152">        String manaValue = this.wizardHouse.getMana() + &quot; / &quot; + this.wizardHouse.getManaCap();</span>
+<span class="nc" id="L153">        app.text(manaValue,15*32,30);</span>
+<span class="nc" id="L154">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

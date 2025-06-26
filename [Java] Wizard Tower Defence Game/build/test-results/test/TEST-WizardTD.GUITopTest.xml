@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="WizardTD.GUITopTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2025-04-23T17:54:26" hostname="maiminhhh.shared.sydney.edu.au" time="0.025">
+  <properties/>
+  <testcase name="testTickTwoWavesTimerWaveCountEqualsWaveSize()" classname="WizardTD.GUITopTest" time="0.013"/>
+  <testcase name="testTickTwoWavesReducingWaitingWavePreWaveTime()" classname="WizardTD.GUITopTest" time="0.0"/>
+  <testcase name="testTickTwoWavesTimer22()" classname="WizardTD.GUITopTest" time="0.001"/>
+  <testcase name="testConstruction()" classname="WizardTD.GUITopTest" time="0.0"/>
+  <testcase name="testTickTwoWavesReducingLastWaveDuration()" classname="WizardTD.GUITopTest" time="0.001"/>
+  <testcase name="testAddWaves()" classname="WizardTD.GUITopTest" time="0.001"/>
+  <testcase name="testTickLastWaveCountTimer0()" classname="WizardTD.GUITopTest" time="0.001"/>
+  <testcase name="testTickLastWaveCountTimer22()" classname="WizardTD.GUITopTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

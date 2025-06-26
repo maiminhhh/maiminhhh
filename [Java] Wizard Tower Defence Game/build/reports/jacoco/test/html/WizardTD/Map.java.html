@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Map.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">scaffold</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Map.java</span></div><h1>Map.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import java.io.*;
+import java.util.*;
+
+public class Map {
+    //class attributes
+    private File mapFile;
+    private ArrayList&lt;Structure&gt; graphicStructures;
+    private ArrayList&lt;Structure&gt; startablePoints;
+    private Structure[][] mapPlan;
+    private Structure destination;
+<span class="nc" id="L15">    private ArrayList&lt;ArrayList&lt;Structure&gt;&gt; possiblePaths = new ArrayList&lt;&gt; ();</span>
+
+    //constructor method
+<span class="nc" id="L18">    public Map(String map) {</span>
+<span class="nc" id="L19">        this.graphicStructures = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L20">        this.mapFile = new File(map);</span>
+<span class="nc" id="L21">        this.startablePoints = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L22">        this.mapPlan = new Structure[20][20];</span>
+<span class="nc" id="L23">    }</span>
+
+    //add tiles to the map matrix
+    public void addGraphics(PImage pathImage0, PImage pathImage090, PImage pathImage1, PImage pathImage190,
+            PImage pathImage1180, PImage pathImage1270, PImage pathImage2, PImage pathImage290, PImage pathImage2180,
+            PImage pathImage2270, PImage pathImage3, PImage shrubImage, PImage grassImage, PImage wizardHouseImage,
+            PImage wizardHouseImage90, PImage wizardHouseImage180, PImage wizardHouseImage270) {
+        try {
+<span class="nc" id="L31">            Scanner scan = new Scanner(this.mapFile);</span>
+<span class="nc" id="L32">            String[] mapLines = new String[20];</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">            for (int line = 0; line &lt; 20; line++) {</span>
+<span class="nc" id="L34">                mapLines[line] = scan.nextLine();</span>
+            }
+<span class="nc" id="L36">            int x = 0;</span>
+<span class="nc" id="L37">            int y = 41;</span>
+<span class="nc" id="L38">            char[] mapMatrix = new char[400];</span>
+<span class="nc" id="L39">            int charIndex = 0;</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">            for (String content : mapLines) {</span>
+<span class="nc" id="L41">                char[] contentChars = content.toCharArray();</span>
+<span class="nc" id="L42">                char[] contentCharsModified = new char[20];</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">                for (int i = 0; i &lt; contentChars.length; i++) {</span>
+<span class="nc" id="L44">                    contentCharsModified[i] = contentChars[i];</span>
+                }
+<span class="nc bnc" id="L46" title="All 2 branches missed.">                for (int i = 0; i &lt; 20; i++) {</span>
+<span class="nc" id="L47">                    mapMatrix[charIndex] = contentCharsModified[i];</span>
+<span class="nc" id="L48">                    charIndex += 1;</span>
+                }
+            }
+<span class="nc" id="L51">            int row = 0;</span>
+<span class="nc" id="L52">            int col = 0;</span>
+<span class="nc" id="L53">            charIndex = 0;</span>
+<span class="nc" id="L54">            int wizardHouseIndex = 0;</span>
+<span class="nc" id="L55">            int wizardHouseX = 0;</span>
+<span class="nc" id="L56">            int wizardHouseY = 0;</span>
+<span class="nc" id="L57">            int wizardRow = 0;</span>
+<span class="nc" id="L58">            int wizardCol = 0;</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">            while (row &lt; 20) {</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                while (col &lt; 20) {</span>
+<span class="nc bnc" id="L61" title="All 4 branches missed.">                    if (mapMatrix[charIndex] == ' ' || mapMatrix[charIndex] == '\0') {</span>
+<span class="nc" id="L62">                        this.graphicStructures.add(new Structure(grassImage, x, y, &quot;grass&quot;));</span>
+<span class="nc" id="L63">                        this.mapPlan[row][col] = new Structure(grassImage, x, y, &quot;grass&quot;);</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">                    } else if (mapMatrix[charIndex] == 'S') {</span>
+<span class="nc" id="L65">                        this.graphicStructures.add(new Structure(shrubImage, x, y, &quot;shrub&quot;));</span>
+<span class="nc" id="L66">                        this.mapPlan[row][col] = new Structure(shrubImage, x, y, &quot;shrub&quot;);</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">                    } else if (mapMatrix[charIndex] == 'X') {</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">                        if (row == 0) {</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">                            if (col == 0) {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">                                if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">                                    if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L72">                                        this.graphicStructures.add(new Structure(pathImage2, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L73">                                        this.mapPlan[row][col] = new Structure(pathImage2, x, y, &quot;path&quot;);</span>
+                                    } else {
+<span class="nc" id="L75">                                        this.graphicStructures.add(new Structure(pathImage0, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L76">                                        this.mapPlan[row][col] = new Structure(pathImage0, x, y, &quot;path&quot;);</span>
+                                    }
+                                } else {
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                                    if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L80">                                        this.graphicStructures.add(new Structure(pathImage090, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L81">                                        this.mapPlan[row][col] = new Structure(pathImage090, x, y, &quot;path&quot;);</span>
+                                    }
+                                }
+                            }
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                            if (col == 19) {</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                                if (mapMatrix[charIndex - 1] == 'X') {</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                                    if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L88">                                        this.graphicStructures.add(new Structure(pathImage290, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L89">                                        this.mapPlan[row][col] = new Structure(pathImage290, x, y, &quot;path&quot;);</span>
+                                    } else {
+<span class="nc" id="L91">                                        this.graphicStructures.add(new Structure(pathImage0, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L92">                                        this.mapPlan[row][col] = new Structure(pathImage0, x, y, &quot;path&quot;);</span>
+                                    }
+                                } else {
+<span class="nc bnc" id="L95" title="All 2 branches missed.">                                    if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L96">                                        this.graphicStructures.add(new Structure(pathImage090, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L97">                                        this.mapPlan[row][col] = new Structure(pathImage090, x, y, &quot;path&quot;);</span>
+                                    }
+                                }
+                            } else {
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                                if (mapMatrix[charIndex - 1] == 'X') {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                                    if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc" id="L104">                                            this.graphicStructures.add(new Structure(pathImage3, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L105">                                            this.mapPlan[row][col] = new Structure(pathImage3,x, y,&quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L107">                                            this.graphicStructures.add(new Structure(pathImage290, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L108">                                            this.mapPlan[row][col] = new Structure(pathImage290, x, y, &quot;path&quot;);</span>
+                                        }
+                                    } else {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc" id="L112">                                            this.graphicStructures.add(new Structure(pathImage1180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L113">                                            this.mapPlan[row][col] = new Structure(pathImage1180, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L115">                                            this.graphicStructures.add(new Structure(pathImage190, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L116">                                            this.mapPlan[row][col] = new Structure(pathImage190, x, y, &quot;path&quot;);</span>
+                                        }
+                                    }
+                                } else {
+<span class="nc bnc" id="L120" title="All 2 branches missed.">                                    if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc" id="L122">                                            this.graphicStructures.add(new Structure(pathImage2180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L123">                                            this.mapPlan[row][col] = new Structure(pathImage2180, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L125">                                            this.graphicStructures.add(new Structure(pathImage090, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L126">                                            this.mapPlan[row][col] = new Structure(pathImage090, x, y, &quot;path&quot;);</span>
+                                        }
+                                    } else {
+<span class="nc bnc" id="L129" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc" id="L130">                                            this.graphicStructures.add(new Structure(pathImage1180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L131">                                            this.mapPlan[row][col] = new Structure(pathImage1180, x, y, &quot;path&quot;);</span>
+                                        }
+                                    }
+                                }
+                            }
+<span class="nc bnc" id="L136" title="All 2 branches missed.">                        } else if (row == 19) {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">                            if (col == 0) {</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                                if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                                    if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc" id="L140">                                        this.graphicStructures.add(new Structure(pathImage2180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L141">                                        this.mapPlan[row][col] = new Structure(pathImage2180, x, y, &quot;path&quot;);</span>
+                                    } else {
+<span class="nc" id="L143">                                        this.graphicStructures.add(new Structure(pathImage0, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L144">                                        this.mapPlan[row][col] = new Structure(pathImage0, x, y, &quot;path&quot;);</span>
+                                    }
+                                } else {
+<span class="nc bnc" id="L147" title="All 2 branches missed.">                                    if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc" id="L148">                                        this.graphicStructures.add(new Structure(pathImage090, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L149">                                        this.mapPlan[row][col] = new Structure(pathImage090, x, y, &quot;path&quot;);</span>
+                                    } else {
+<span class="nc" id="L151">                                        this.graphicStructures.add(new Structure(pathImage1, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L152">                                        this.mapPlan[row][col] = new Structure(pathImage1, x, y, &quot;path&quot;);</span>
+                                    }
+                                }
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                            } else if (col == 19) {</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">                                if (mapMatrix[charIndex - 1] == 'X') {</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">                                    if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc" id="L158">                                        this.graphicStructures.add(new Structure(pathImage2180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L159">                                        this.mapPlan[row][col] = new Structure(pathImage2180, x, y, &quot;path&quot;);</span>
+                                    } else {
+<span class="nc" id="L161">                                        this.graphicStructures.add(new Structure(pathImage0, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L162">                                        this.mapPlan[row][col] = new Structure(pathImage0, x, y, &quot;path&quot;);</span>
+                                    }
+                                } else {
+<span class="nc bnc" id="L165" title="All 2 branches missed.">                                    if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc" id="L166">                                        this.graphicStructures.add(new Structure(pathImage090, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L167">                                        this.mapPlan[row][col] = new Structure(pathImage090, x, y, &quot;path&quot;);</span>
+                                    } else {
+<span class="nc" id="L169">                                        this.graphicStructures.add(new Structure(pathImage1270, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L170">                                        this.mapPlan[row][col] = new Structure(pathImage1270, x, y, &quot;path&quot;);</span>
+                                    }
+                                }
+                            } else {
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                                if (mapMatrix[charIndex - 1] == 'X') {</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">                                    if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                                        if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc" id="L177">                                            this.graphicStructures.add(new Structure(pathImage2180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L178">                                            this.mapPlan[row][col] = new Structure(pathImage2180, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L180">                                            this.graphicStructures.add(new Structure(pathImage0, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L181">                                            this.mapPlan[row][col] = new Structure(pathImage0, x, y, &quot;path&quot;);</span>
+                                        }
+                                    } else {
+<span class="nc bnc" id="L184" title="All 2 branches missed.">                                        if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc" id="L185">                                            this.graphicStructures.add(new Structure(pathImage190, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L186">                                            this.mapPlan[row][col] = new Structure(pathImage190, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L188">                                            this.graphicStructures.add(new Structure(pathImage1, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L189">                                            this.mapPlan[row][col] = new Structure(pathImage1, x, y, &quot;path&quot;);</span>
+                                        }
+                                    }
+                                } else {
+<span class="nc bnc" id="L193" title="All 2 branches missed.">                                    if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">                                        if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc" id="L195">                                            this.graphicStructures.add(new Structure(pathImage1180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L196">                                            this.mapPlan[row][col] = new Structure(pathImage1180, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L198">                                            this.graphicStructures.add(new Structure(pathImage1270, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L199">                                            this.mapPlan[row][col] = new Structure(pathImage1270, x, y, &quot;path&quot;);</span>
+                                        }
+                                    } else {
+<span class="nc bnc" id="L202" title="All 2 branches missed.">                                        if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc" id="L203">                                            this.graphicStructures.add(new Structure(pathImage090, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L204">                                            this.mapPlan[row][col] = new Structure(pathImage090, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L206">                                            this.graphicStructures.add(new Structure(pathImage1, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L207">                                            this.mapPlan[row][col] = new Structure(pathImage1, x, y, &quot;path&quot;);</span>
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+<span class="nc bnc" id="L213" title="All 2 branches missed.">                            if (col == 0) {</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">                                if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">                                    if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L217">                                            this.graphicStructures.add(new Structure(pathImage3, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L218">                                            this.mapPlan[row][col] = new Structure(pathImage3, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L220">                                            this.graphicStructures.add(new Structure(pathImage2180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L221">                                            this.mapPlan[row][col] = new Structure(pathImage2180, x, y, &quot;path&quot;);</span>
+                                        }
+                                    } else {
+<span class="nc bnc" id="L224" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L225">                                            this.graphicStructures.add(new Structure(pathImage2, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L226">                                            this.mapPlan[row][col] = new Structure(pathImage2, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L228">                                            this.graphicStructures.add(new Structure(pathImage0, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L229">                                            this.mapPlan[row][col] = new Structure(pathImage0, x, y, &quot;path&quot;);</span>
+                                        }
+                                    }
+                                } else {
+<span class="nc bnc" id="L233" title="All 2 branches missed.">                                    if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L235">                                            this.graphicStructures.add(new Structure(pathImage090, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L236">                                            this.mapPlan[row][col] = new Structure(pathImage090, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L238">                                            this.graphicStructures.add(new Structure(pathImage190, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L239">                                            this.mapPlan[row][col] = new Structure(pathImage190, x, y, &quot;path&quot;);</span>
+                                        }
+                                    } else {
+<span class="nc bnc" id="L242" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L243">                                            this.graphicStructures.add(new Structure(pathImage1, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L244">                                            this.mapPlan[row][col] = new Structure(pathImage1, x, y, &quot;path&quot;);</span>
+                                        }
+                                    }
+                                }
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                            } else if (col == 19) {</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">                                if (mapMatrix[charIndex - 1] == 'X') {</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">                                    if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L252">                                            this.graphicStructures.add(new Structure(pathImage3, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L253">                                            this.mapPlan[row][col] = new Structure(pathImage3, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L255">                                            this.graphicStructures.add(new Structure(pathImage190, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L256">                                            this.mapPlan[row][col] = new Structure(pathImage190, x, y, &quot;path&quot;);</span>
+                                        }
+                                    } else {
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L260">                                            this.graphicStructures.add(new Structure(pathImage1, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L261">                                            this.mapPlan[row][col] = new Structure(pathImage1, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L263">                                            this.graphicStructures.add(new Structure(pathImage0, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L264">                                            this.mapPlan[row][col] = new Structure(pathImage0, x, y, &quot;path&quot;);</span>
+                                        }
+                                    }
+                                } else {
+<span class="nc bnc" id="L268" title="All 2 branches missed.">                                    if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L270">                                            this.graphicStructures.add(new Structure(pathImage2270, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L271">                                            this.mapPlan[row][col] = new Structure(pathImage2270, x, y, &quot;path&quot;);</span>
+                                        } else {
+<span class="nc" id="L273">                                            this.graphicStructures.add(new Structure(pathImage1180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L274">                                            this.mapPlan[row][col] = new Structure(pathImage1180, x, y, &quot;path&quot;);</span>
+                                        }
+                                    } else {
+<span class="nc bnc" id="L277" title="All 2 branches missed.">                                        if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L278">                                            this.graphicStructures.add(new Structure(pathImage1270, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L279">                                            this.mapPlan[row][col] = new Structure(pathImage1270, x, y, &quot;path&quot;);</span>
+                                        }
+                                    }
+                                }
+                            } else {
+<span class="nc bnc" id="L284" title="All 2 branches missed.">                                if (mapMatrix[charIndex - 1] == 'X') {</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">                                    if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">                                        if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">                                            if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L288">                                                this.graphicStructures.add(new Structure(pathImage3, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L289">                                                this.mapPlan[row][col] = new Structure(pathImage3, x, y, &quot;path&quot;);</span>
+                                            } else {
+<span class="nc" id="L291">                                                this.graphicStructures.add(new Structure(pathImage2180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L292">                                                this.mapPlan[row][col] = new Structure(pathImage2180, x, y, &quot;path&quot;);</span>
+                                            }
+                                        } else {
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                                            if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L296">                                                this.graphicStructures.add(new Structure(pathImage2, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L297">                                                this.mapPlan[row][col] = new Structure(pathImage2, x, y, &quot;path&quot;);</span>
+                                            } else {
+<span class="nc" id="L299">                                                this.graphicStructures.add(new Structure(pathImage0, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L300">                                                this.mapPlan[row][col] = new Structure(pathImage0, x, y, &quot;path&quot;);</span>
+                                            }
+                                        }
+                                    } else {
+<span class="nc bnc" id="L304" title="All 2 branches missed.">                                        if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">                                            if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L306">                                                this.graphicStructures.add(new Structure(pathImage290, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L307">                                                this.mapPlan[row][col] = new Structure(pathImage290, x, y, &quot;path&quot;);</span>
+                                            } else {
+<span class="nc" id="L309">                                                this.graphicStructures.add(new Structure(pathImage190, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L310">                                                this.mapPlan[row][col] = new Structure(pathImage190, x, y, &quot;path&quot;);</span>
+                                            }
+                                        } else {
+<span class="nc bnc" id="L313" title="All 2 branches missed.">                                            if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L314">                                                this.graphicStructures.add(new Structure(pathImage1, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L315">                                                this.mapPlan[row][col] = new Structure(pathImage1, x, y, &quot;path&quot;);</span>
+                                            }
+                                        }
+                                    }
+                                } else {
+<span class="nc bnc" id="L320" title="All 2 branches missed.">                                    if (mapMatrix[charIndex + 1] == 'X') {</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">                                        if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">                                            if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L323">                                                this.graphicStructures.add(new Structure(pathImage2270, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L324">                                                this.mapPlan[row][col] = new Structure(pathImage2270, x, y, &quot;path&quot;);</span>
+                                            } else {
+<span class="nc" id="L326">                                                this.graphicStructures.add(new Structure(pathImage1180, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L327">                                                this.mapPlan[row][col] = new Structure(pathImage1180, x, y, &quot;path&quot;);</span>
+                                            }
+                                        } else {
+<span class="nc bnc" id="L330" title="All 2 branches missed.">                                            if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L331">                                                this.graphicStructures.add(new Structure(pathImage1270, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L332">                                                this.mapPlan[row][col] = new Structure(pathImage1270, x, y, &quot;path&quot;);</span>
+                                            } else {
+<span class="nc" id="L334">                                                this.graphicStructures.add(new Structure(pathImage0, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L335">                                                this.mapPlan[row][col] = new Structure(pathImage0, x, y, &quot;path&quot;);</span>
+                                            }
+                                        }
+                                    } else {
+<span class="nc bnc" id="L339" title="All 2 branches missed.">                                        if (mapMatrix[charIndex - 20] == 'X') {</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">                                            if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L341">                                                this.graphicStructures.add(new Structure(pathImage090, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L342">                                                this.mapPlan[row][col] = new Structure(pathImage090, x, y, &quot;path&quot;);</span>
+                                            } else {
+<span class="nc" id="L344">                                                this.graphicStructures.add(new Structure(pathImage090, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L345">                                                this.mapPlan[row][col] = new Structure(pathImage090, x, y, &quot;path&quot;);</span>
+                                            }
+                                        } else {
+<span class="nc bnc" id="L348" title="All 2 branches missed.">                                            if (mapMatrix[charIndex + 20] == 'X') {</span>
+<span class="nc" id="L349">                                                this.graphicStructures.add(new Structure(pathImage090, x, y, &quot;path&quot;));</span>
+<span class="nc" id="L350">                                                this.mapPlan[row][col] = new Structure(pathImage090, x, y, &quot;path&quot;);</span>
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+<span class="nc bnc" id="L357" title="All 2 branches missed.">                    } else if (mapMatrix[charIndex] == 'W') {</span>
+<span class="nc" id="L358">                        this.graphicStructures.add(new Structure(grassImage, x, y, &quot;grass&quot;));</span>
+<span class="nc" id="L359">                        wizardHouseIndex = charIndex;</span>
+<span class="nc" id="L360">                        wizardHouseX = x;</span>
+<span class="nc" id="L361">                        wizardHouseY = y;</span>
+<span class="nc" id="L362">                        wizardCol = col;</span>
+<span class="nc" id="L363">                        wizardRow = row;</span>
+                    }
+<span class="nc" id="L365">                    x += 32;</span>
+<span class="nc" id="L366">                    col += 1;</span>
+<span class="nc" id="L367">                    charIndex += 1;</span>
+                }
+<span class="nc" id="L369">                y += 32;</span>
+<span class="nc" id="L370">                x = 0;</span>
+<span class="nc" id="L371">                col = 0;</span>
+<span class="nc" id="L372">                row += 1;</span>
+            }
+<span class="nc bnc" id="L374" title="All 2 branches missed.">            if (wizardHouseIndex % 20 == 0) {</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">                if (wizardHouseIndex == 0) {</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">                    if (mapMatrix[wizardHouseIndex+1] == 'X') {</span>
+<span class="nc" id="L377">                        this.graphicStructures.add(new Structure(wizardHouseImage, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L378">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                    else {
+<span class="nc" id="L381">                        this.graphicStructures.add(new Structure(wizardHouseImage90, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L382">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage90, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                }
+<span class="nc bnc" id="L385" title="All 2 branches missed.">                else if (wizardHouseIndex == 20*19) {</span>
+<span class="nc bnc" id="L386" title="All 2 branches missed.">                    if (mapMatrix[wizardHouseIndex+1] == 'X') {</span>
+<span class="nc" id="L387">                        this.graphicStructures.add(new Structure(wizardHouseImage, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L388">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                    else {
+<span class="nc" id="L391">                        this.graphicStructures.add(new Structure(wizardHouseImage270, wizardHouseX,wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L392">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage270, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                }
+                else {
+<span class="nc bnc" id="L396" title="All 2 branches missed.">                    if (mapMatrix[wizardHouseIndex+1] == 'X') {</span>
+<span class="nc" id="L397">                        this.graphicStructures.add(new Structure(wizardHouseImage,wizardHouseX,wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L398">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+<span class="nc bnc" id="L400" title="All 2 branches missed.">                    else if (mapMatrix[wizardHouseIndex-20] == 'X') {</span>
+<span class="nc" id="L401">                        this.graphicStructures.add(new Structure(wizardHouseImage270, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L402">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage270, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+<span class="nc bnc" id="L404" title="All 2 branches missed.">                    else if (mapMatrix[wizardHouseIndex+20] == 'X') {</span>
+<span class="nc" id="L405">                        this.graphicStructures.add(new Structure(wizardHouseImage90, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L406">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage90, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                }
+            }
+<span class="nc bnc" id="L410" title="All 2 branches missed.">            else if (wizardHouseIndex % 20 == 19) {</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">                if (wizardHouseIndex == 19) {</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">                    if (mapMatrix[wizardHouseIndex-1] == 'X') {</span>
+<span class="nc" id="L413">                        this.graphicStructures.add(new Structure(wizardHouseImage180, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L414">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage180, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                    else {
+<span class="nc" id="L417">                        this.graphicStructures.add(new Structure(wizardHouseImage90, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L418">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage90, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                }
+<span class="nc bnc" id="L421" title="All 2 branches missed.">                else if (wizardHouseIndex == 20*19-1) {</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">                    if (mapMatrix[wizardHouseIndex-1] == 'X') {</span>
+<span class="nc" id="L423">                        this.graphicStructures.add(new Structure(wizardHouseImage180, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L424">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage180, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                    else {
+<span class="nc" id="L427">                        this.graphicStructures.add(new Structure(wizardHouseImage270, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L428">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage270, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                }
+                else {
+<span class="nc bnc" id="L432" title="All 2 branches missed.">                    if (mapMatrix[wizardHouseIndex-1] == 'X') {</span>
+<span class="nc" id="L433">                        this.graphicStructures.add(new Structure(wizardHouseImage180, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L434">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage180, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+<span class="nc bnc" id="L436" title="All 2 branches missed.">                    else if (mapMatrix[wizardHouseIndex-20] == 'X') {</span>
+<span class="nc" id="L437">                        this.graphicStructures.add(new Structure(wizardHouseImage270, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L438">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage270, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                    else {
+<span class="nc" id="L441">                        this.graphicStructures.add(new Structure(wizardHouseImage90, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L442">                        this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage90, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                    }
+                }
+            }
+            else {
+<span class="nc bnc" id="L447" title="All 2 branches missed.">                if (mapMatrix[wizardHouseIndex-1] == 'X') {</span>
+<span class="nc" id="L448">                    this.graphicStructures.add(new Structure(wizardHouseImage180, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L449">                    this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage180, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                }
+<span class="nc bnc" id="L451" title="All 2 branches missed.">                else if (mapMatrix[wizardHouseIndex+1] == 'X') {</span>
+<span class="nc" id="L452">                    this.graphicStructures.add(new Structure(wizardHouseImage, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L453">                    this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                }
+<span class="nc bnc" id="L455" title="All 2 branches missed.">                else if (mapMatrix[wizardHouseIndex-20] == 'X') {</span>
+<span class="nc" id="L456">                    this.graphicStructures.add(new Structure(wizardHouseImage270,wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L457">                    this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage270, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                }
+                else {
+<span class="nc" id="L460">                    this.graphicStructures.add(new Structure(wizardHouseImage90, wizardHouseX, wizardHouseY, &quot;wizard house&quot;));</span>
+<span class="nc" id="L461">                    this.mapPlan[wizardRow][wizardCol] = new Structure(wizardHouseImage90, wizardHouseX, wizardHouseY, &quot;wizard house&quot;);</span>
+                }
+            }
+<span class="nc" id="L464">        } catch (Exception e) {</span>
+<span class="nc" id="L465">            System.out.println(e.getStackTrace().toString());</span>
+<span class="nc" id="L466">        }</span>
+<span class="nc" id="L467">    }</span>
+
+    //set the surrounding attribute for each tiles within the map
+    public void setSurrounding() {
+<span class="nc bnc" id="L471" title="All 2 branches missed.">        for (int row = 0; row &lt; this.mapPlan.length; row++) {</span>
+<span class="nc bnc" id="L472" title="All 2 branches missed.">            for (int col = 0; col &lt; this.mapPlan[1].length; col++) {</span>
+<span class="nc" id="L473">                Structure updatedStructure = this.mapPlan[row][col];</span>
+<span class="nc bnc" id="L474" title="All 2 branches missed.">                if (row == 0) {</span>
+<span class="nc" id="L475">                    updatedStructure.setBelow(this.mapPlan[row+1][col]);</span>
+<span class="nc" id="L476">                    updatedStructure.setAbove(null);</span>
+<span class="nc bnc" id="L477" title="All 2 branches missed.">                    if (col == 0) {</span>
+<span class="nc" id="L478">                        updatedStructure.setFront(this.mapPlan[row][col+1]);</span>
+<span class="nc" id="L479">                        updatedStructure.setBack(null);</span>
+                    }
+<span class="nc bnc" id="L481" title="All 2 branches missed.">                    else if (col == 19) {</span>
+<span class="nc" id="L482">                        updatedStructure.setBack(this.mapPlan[row][col-1]);</span>
+<span class="nc" id="L483">                        updatedStructure.setFront(null);</span>
+                    }
+                    else {
+<span class="nc" id="L486">                        updatedStructure.setFront(this.mapPlan[row][col+1]);</span>
+<span class="nc" id="L487">                        updatedStructure.setBack(this.mapPlan[row][col-1]);</span>
+                    }
+                }
+<span class="nc bnc" id="L490" title="All 2 branches missed.">                else if (row == 19) {</span>
+<span class="nc" id="L491">                    updatedStructure.setAbove(this.mapPlan[row-1][col]);</span>
+<span class="nc" id="L492">                    updatedStructure.setBelow(null);</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">                    if (col == 0) {</span>
+<span class="nc" id="L494">                        updatedStructure.setFront(this.mapPlan[row][col+1]);</span>
+<span class="nc" id="L495">                        updatedStructure.setBack(null);</span>
+                    }
+<span class="nc bnc" id="L497" title="All 2 branches missed.">                    else if (col == 19) {</span>
+<span class="nc" id="L498">                        updatedStructure.setBack(this.mapPlan[row][col-1]);</span>
+<span class="nc" id="L499">                        updatedStructure.setFront(null);</span>
+                    }
+                    else {
+<span class="nc" id="L502">                        updatedStructure.setFront(this.mapPlan[row][col+1]);</span>
+<span class="nc" id="L503">                        updatedStructure.setBack(this.mapPlan[row][col-1]);</span>
+                    }
+                }
+<span class="nc bnc" id="L506" title="All 2 branches missed.">                else if (col == 0) {</span>
+<span class="nc" id="L507">                    updatedStructure.setAbove(this.mapPlan[row-1][col]);</span>
+<span class="nc" id="L508">                    updatedStructure.setBelow(this.mapPlan[row+1][col]);</span>
+<span class="nc" id="L509">                    updatedStructure.setFront(this.mapPlan[row][col+1]);</span>
+<span class="nc" id="L510">                    updatedStructure.setBack(null);</span>
+                }
+<span class="nc bnc" id="L512" title="All 2 branches missed.">                else if (col == 19) {</span>
+<span class="nc" id="L513">                    updatedStructure.setAbove(this.mapPlan[row-1][col]);</span>
+<span class="nc" id="L514">                    updatedStructure.setBelow(this.mapPlan[row+1][col]);</span>
+<span class="nc" id="L515">                    updatedStructure.setBack(this.mapPlan[row][col-1]);</span>
+<span class="nc" id="L516">                    updatedStructure.setFront(null);</span>
+                }
+                else {
+<span class="nc" id="L519">                    updatedStructure.setAbove(this.mapPlan[row-1][col]);</span>
+<span class="nc" id="L520">                    updatedStructure.setBelow(this.mapPlan[row+1][col]);</span>
+<span class="nc" id="L521">                    updatedStructure.setFront(this.mapPlan[row][col+1]);</span>
+<span class="nc" id="L522">                    updatedStructure.setBack(this.mapPlan[row][col-1]);</span>
+                }
+<span class="nc" id="L524">                this.mapPlan[row][col] = updatedStructure;</span>
+<span class="nc bnc" id="L525" title="All 2 branches missed.">                if (updatedStructure.isStartable()) {</span>
+<span class="nc" id="L526">                    this.startablePoints.add(updatedStructure);</span>
+                }
+<span class="nc bnc" id="L528" title="All 2 branches missed.">                if (updatedStructure.isDestination()){</span>
+<span class="nc" id="L529">                    this.destination = updatedStructure;</span>
+                }
+            }
+        }
+<span class="nc bnc" id="L533" title="All 2 branches missed.">        for (Structure start : startablePoints) {</span>
+<span class="nc bnc" id="L534" title="All 2 branches missed.">            if (start != null) {</span>
+<span class="nc bnc" id="L535" title="All 2 branches missed.">                if (this.destination != null) {</span>
+<span class="nc" id="L536">                    this.possiblePaths.add(this.findPath(start, this.destination));</span>
+<span class="nc" id="L537">                    this.reset();</span>
+                }
+            }
+<span class="nc" id="L540">        }</span>
+<span class="nc" id="L541">    }</span>
+
+    //get the map plan
+    public Structure[][] getMapPlan(){
+<span class="nc" id="L545">        return this.mapPlan;</span>
+    }
+
+    //reset the g, h and parent attribute of the neighboring structures
+    public void reset(){
+<span class="nc bnc" id="L550" title="All 2 branches missed.">        for (Structure[] row : this.mapPlan) {</span>
+<span class="nc bnc" id="L551" title="All 2 branches missed.">            for (Structure structure : row) {</span>
+<span class="nc" id="L552">                ArrayList&lt;Structure&gt; neighbors = structure.getNeighbors();</span>
+<span class="nc bnc" id="L553" title="All 2 branches missed.">                for (Structure neighbor : neighbors) {</span>
+<span class="nc bnc" id="L554" title="All 2 branches missed.">                    if (neighbor != null) {</span>
+<span class="nc" id="L555">                        neighbor.setG(0);</span>
+<span class="nc" id="L556">                        neighbor.setH(0);</span>
+<span class="nc" id="L557">                        neighbor.setParent(null);</span>
+                    }
+<span class="nc" id="L559">                }</span>
+            }
+        }
+<span class="nc" id="L562">    }</span>
+
+    //output the path that is available for commuting
+    public ArrayList&lt;Structure&gt; reconstructPath(Structure structure) {
+<span class="nc" id="L566">        ArrayList&lt;Structure&gt; path = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L567" title="All 2 branches missed.">        while (structure != null) {</span>
+<span class="nc" id="L568">            path.add(structure);</span>
+<span class="nc" id="L569">            structure = structure.getParent();</span>
+        }
+<span class="nc" id="L571">        Collections.reverse(path);</span>
+<span class="nc" id="L572">        return path;</span>
+    }
+
+    //get all the possible paths on the map
+    public ArrayList&lt;ArrayList&lt;Structure&gt;&gt; getPossiblePaths() {
+<span class="nc" id="L577">        return this.possiblePaths;</span>
+    }
+
+    //finding and update available paths
+    public ArrayList&lt;Structure&gt; findPath(Structure start, Structure end) {
+<span class="nc" id="L582">        ArrayList&lt;Structure&gt; openSet = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L583">        Set closedSet = new HashSet();</span>
+<span class="nc" id="L584">        Map map = this;</span>
+<span class="nc" id="L585">        openSet.add(start);</span>
+<span class="nc bnc" id="L586" title="All 2 branches missed.">        while (!openSet.isEmpty()) {</span>
+<span class="nc" id="L587">            Structure current = openSet.get(0);</span>
+<span class="nc" id="L588">            openSet.remove(0);</span>
+<span class="nc bnc" id="L589" title="All 2 branches missed.">            if (current.equals(end)) {</span>
+<span class="nc" id="L590">                return map.reconstructPath(current);</span>
+            }
+<span class="nc" id="L592">            closedSet.add(current);</span>
+<span class="nc bnc" id="L593" title="All 2 branches missed.">            for (Structure neighbor : current.getNeighbors()) {</span>
+<span class="nc bnc" id="L594" title="All 2 branches missed.">                if (neighbor == null) {</span>
+<span class="nc" id="L595">                    continue;</span>
+                }
+<span class="nc bnc" id="L597" title="All 2 branches missed.">                if (!neighbor.isPathable()) {</span>
+<span class="nc" id="L598">                    continue;</span>
+                }
+<span class="nc bnc" id="L600" title="All 2 branches missed.">                if (closedSet.contains(neighbor)) {</span>
+<span class="nc" id="L601">                    continue;</span>
+                }
+<span class="nc" id="L603">                int tentativeG = current.getG() + 1;</span>
+<span class="nc bnc" id="L604" title="All 4 branches missed.">                if (!openSet.contains(neighbor) || tentativeG &lt; neighbor.getG()) {</span>
+<span class="nc" id="L605">                    neighbor.setG(tentativeG);</span>
+<span class="nc" id="L606">                    neighbor.setH(neighbor.h(destination));</span>
+<span class="nc" id="L607">                    neighbor.setParent(current);</span>
+                }
+<span class="nc bnc" id="L609" title="All 2 branches missed.">                if (!openSet.contains(neighbor)) {</span>
+<span class="nc" id="L610">                    openSet.add(neighbor);</span>
+                }
+<span class="nc" id="L612">            }</span>
+<span class="nc" id="L613">        }</span>
+<span class="nc" id="L614">        return null;</span>
+    }
+
+    //draw the map
+    public void draw(PApplet app) {
+<span class="nc bnc" id="L619" title="All 2 branches missed.">        for (Structure structure : this.graphicStructures) {</span>
+<span class="nc" id="L620">            structure.draw(app);</span>
+<span class="nc" id="L621">        }</span>
+<span class="nc" id="L622">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
