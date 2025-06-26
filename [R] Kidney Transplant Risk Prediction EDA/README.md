@@ -2,7 +2,7 @@
 **Datasets**: GSE57387 (biopsy) & GSE46474 (blood)  
 **Language**: R | **Libraries**: limma, caret, tidyverse, ggplot2
 
-[![View HTML Report](https://img.shields.io/badge/📄%20View%20Report-Click%20Here-brightgreen?style=flat-square)](https://maiminhhh.github.io/data3888-1/)
+[![View HTML Report](https://img.shields.io/badge/📄%20View%20Report-Click%20Here-brightgreen?style=flat-square)](https://maiminhhh.github.io/maiminhhh/data3888-1/)
 
 This project explores how gene expression data can be used to understand and predict kidney transplant outcomes. It demonstrates a complete data science workflow—from raw bioinformatics data to interpretable models supporting clinical decision-making.
 
@@ -35,7 +35,7 @@ This project explores how gene expression data can be used to understand and pre
 
 ## 🌐 Live Report
 
-- 📄 [View the full interactive report](https://maiminhhh.github.io/data3888-1/)
+- 📄 [View the full interactive report](https://maiminhhh.github.io/maiminhhh/data3888-1/)
 - Includes all plots, tables, and discussion of clinical implications.
 
 ---
