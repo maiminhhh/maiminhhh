@@ -1,6 +1,6 @@
 # 🌍 Interactive Mapping with Leaflet.js
 
-[![GitHub Pages](https://img.shields.io/badge/View%20Live-Demo-green?style=flat-square&logo=github)](https://maiminhhh.github.io/leaflet-map-project/)
+[![GitHub Pages](https://img.shields.io/badge/View%20Live-Demo-green?style=flat-square&logo=github)](https://maiminhhh.github.io/maiminhhh/[R]%20DATA1901%20Interactive%20Heatmap)
 
 This project visualizes geospatial coordinate data on an interactive web map using **Leaflet.js**. It is a standalone frontend project aimed at exploring spatial patterns in a specific region through map-based visualization.
 
@@ -23,6 +23,6 @@ This project visualizes geospatial coordinate data on an interactive web map usi
 > Note: This project is fully static and does not require a backend server.
 
 ## 🔗 Live Demo
-[Click here to view the live map](https://YOUR_USERNAME.github.io/leaflet-map-project/)
+[Click here to view the live map](https://maiminhhh.github.io/maiminhhh/[R]%20DATA1901%20Interactive%20Heatmap)
 
 ---
