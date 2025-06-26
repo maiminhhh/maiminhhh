@@ -1,7 +1,7 @@
 # 🧹 Exploratory Data Analysis & Data Cleaning  
 ### *Australian Health Survey (AHS) Project*
 
-[![View Final Report](https://img.shields.io/badge/📄%20View%20Report-Click%20Here-brightgreen?style=flat-square)](https://maiminhhh.github.io/ahs-data-cleaning-project/)
+[![View Final Report](https://img.shields.io/badge/📄%20View%20Report-Click%20Here-brightgreen?style=flat-square)](https://maiminhhh.github.io/maiminhhh/stat3888/)
 
 ---
 
@@ -48,7 +48,7 @@ The final cleaned data is saved as:
 
 ## 🌐 Final Report
 
-📄 [Click here to view the interactive HTML report](https://maiminhhh.github.io/ahs-data-cleaning-project/)
+📄 [Click here to view the interactive HTML report](https://maiminhhh.github.io/maiminhhh/stat3888/)
 
 > Includes: missingness diagnostics, summary stats, structure tables, and variable-by-variable insights.
 
