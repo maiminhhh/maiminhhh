@@ -2,7 +2,7 @@
 
 [![GitHub Pages](https://img.shields.io/badge/View%20Live-Demo-green?style=flat-square&logo=github)](https://maiminhhh.github.io/maiminhhh/data1901)
 
-This project visualizes geospatial coordinate data on an interactive web map using **Leaflet.js**. It is a standalone frontend project aimed at exploring spatial patterns in a specific region through map-based visualization. It received a score 9/10 in DATA1901: Foundations of Data Science (Adv) at The University of Sydney in Semester 1 - 2023.
+This project visualizes geospatial coordinate data on an interactive web map using **Leaflet.js**. It is a standalone frontend project aimed at exploring spatial patterns in a specific region through map-based visualization. It received a score **9/10** in DATA1901: Foundations of Data Science (Adv) at The University of Sydney in Semester 1 - 2023.
 
 ## 📌 Project Overview
 - **Goal**: Display and interact with geospatial data using dynamic map layers.
