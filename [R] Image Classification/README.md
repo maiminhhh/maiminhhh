@@ -25,14 +25,14 @@ This project benchmarks multiple machine learning models to classify **tumour** 
 
 ### 🧮 2. Feature Engineering
 - Extracted image descriptors:
-  - **Histogram of Oriented Gradients (HOG)**
-  - **Histogram of Colours (HSV bins)**
+  - Histogram of Oriented Gradients (HOG)
+  - Histogram of Colours (HSV bins)
 
 ### 🤖 3. Models Evaluated
-- **Random Forest**
-- **Support Vector Machine (SVM)**
-- **K-Nearest Neighbours (KNN)**
-- **Convolutional Neural Network (CNN)** *(exploratory)*
+- Random Forest
+- Support Vector Machine (SVM)
+- K-Nearest Neighbours (KNN)
+- Convolutional Neural Network (CNN)
 
 ---
 
