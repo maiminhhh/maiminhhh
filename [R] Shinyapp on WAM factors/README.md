@@ -1,5 +1,7 @@
 # 📊 Exploratory Analysis of WAM in DATA2X02
 
+[![View App](https://img.shields.io/badge/🚀%20View%20App-Click%20Here-brightgreen?style=flat-square)](https://maiminhhh.shinyapps.io/DATA2902_ShinyApp/)
+
 This project presents an **exploratory data analysis (EDA)** of student performance data in the University of Sydney's DATA2X02 course. The goal is to identify potential factors associated with **Weighted Average Mark (WAM)** through descriptive statistics and interactive visualization. This individual assignment got a mark of **9.05/10**, with the Shinyapp graded **4.8/5** in DATA2902: Data Analytics: Learning from Data in Semester 2 - 2023 at The University of Sydney. 
 
 ---
