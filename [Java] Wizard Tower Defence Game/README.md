@@ -5,8 +5,7 @@ A Java-based game developed using **Gradle**, featuring infinite randomized roun
 > ✅ Built with OOP principles  
 > ✅ Infinite, auto-generated rounds  
 > ✅ Gameplay demo video included  
-> ✅ Full feature documentation available
-This game was graded **18/20** in INFO1113: Object-Oriented Programming in Semester 2 - 2023 at The University of Sydney.
+> ✅ Full feature documentation available \\This game was graded **18/20** in INFO1113: Object-Oriented Programming in Semester 2 - 2023 at The University of Sydney.
 ---
 
 ## 🎬 Demo Video
