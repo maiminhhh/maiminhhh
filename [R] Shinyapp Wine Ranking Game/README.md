@@ -1,5 +1,5 @@
 # 🍷 Wine Ranking Game (Shiny App)
-[![View App](https://img.shields.io/badge/📄%20View%20App-Click%20Here-brightgreen?style=flat-square)](https://maiminhhh.shinyapps.io/WineQuality/)
+[![View App](https://img.shields.io/badge/📄%20View%20Report-Click%20Here-brightgreen?style=flat-square)](https://maiminhhh.shinyapps.io/WineQuality/)
 
 ## Overview
 
