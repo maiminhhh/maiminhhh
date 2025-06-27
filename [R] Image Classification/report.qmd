@@ -1,0 +1,632 @@
+---
+title: "[DATA3888] Disciplinary Assessment 2"
+author: "510569026"
+format:
+  html:
+    code-tools: true
+    code-fold: true
+    fig_caption: yes
+    number_sections: yes
+    embed-resources: true
+    theme: flatly
+    #css: 
+     # - https://use.fontawesome.com/releases/v5.0.6/css/all.css
+    toc: true
+    toc_depth: 5
+    toc_float: true
+execute:
+  echo: true
+  tidy: true
+---
+
+# 1. Data pre-processing
+
+::: panel-tabset
+## Packages loading
+
+```{r packages, warning = FALSE, message = FALSE}
+library(EBImage)
+library(tidyverse)
+library(randomForest)
+library(ggplot2)
+library(OpenImageR)
+library(class)
+library(abind)
+library(e1071)
+library(keras)
+library(tensorflow)
+library(magick)
+library(viridis)
+library(keras3)
+library(tensorflow)
+library(plotly)
+library(janitor)
+library(caret)
+library(reticulate)
+library(ggrepel)
+```
+
+## Dataset imported & pre-processing
+
+```{r data, warning = FALSE, message = FALSE}
+# list out file names of tumour and immune images
+tumour = list.files('100/CD4+_T_Cells', full.names = TRUE) |> sample()
+immune = list.files('100/Invasive_Tumor', full.names = TRUE) |> sample()
+# exclude the uninformative images (i.e. the blank ones)
+tumour = tumour[!str_detect(tumour, '10.png')]
+immune = immune[!str_detect(immune, '10.png')]
+# apply readImage function to get the data from the image
+tumour_imgs = sapply(tumour, EBImage::readImage, simplify = FALSE)
+immune_imgs = sapply(immune, EBImage::readImage, simplify = FALSE)
+# resize the images so that they have the same height and width
+tumour_imgs = tumour_imgs |> lapply(resize, w = 100, h = 100)
+immune_imgs = immune_imgs |> lapply(resize, w = 100, h = 100)
+# combine the images into 1 list
+X = c(tumour_imgs, immune_imgs)
+# create a matrix to store the information of the images
+Xmat = abind(lapply(X, function(x) x@.Data), along = 0)
+# label the samples
+y = c(rep('tumour', 1000), rep('immune', 976)) |> as.factor()
+```
+
+## Histogram of gradients (HOG)
+
+```{r hog, warning = FALSE, message = FALSE}
+Xmat_hog = apply(Xmat, 1, HOG, cells = 6, orientations = 9) |> t()
+```
+
+## Histogram of colours (HOC)
+
+```{r hoc, warning = FALSE, message = FALSE}
+# function to compute color histograms for each channel (r, g, b)
+get_colour_histogram <- function(img, bins = 16) {  # later: check for 32 or 64 bins
+  # separate the rgb channels and calculate the histograms for each channel
+  r_hist <- hist(img[,,1], 
+                 breaks = seq(0, 1, length.out = bins + 1), plot = FALSE)
+  g_hist <- hist(img[,,2], 
+                 breaks = seq(0, 1, length.out = bins + 1), plot = FALSE)
+  b_hist <- hist(img[,,3], 
+                 breaks = seq(0, 1, length.out = bins + 1), plot = FALSE)
+  # combine the histograms into a single vector (flattened)
+  colour_histogram <- c(r_hist$counts/sum(r_hist$counts), 
+                        g_hist$counts/sum(g_hist$counts), 
+                        b_hist$counts/sum(b_hist$counts))
+  return(colour_histogram)
+}
+hoc_ls = c()
+# loop through all images in the dataset
+for (i in 1:dim(Xmat)[1]) {
+  img = Xmat[i,,,]  # select the i-th image
+  col_hist = get_colour_histogram(img)
+  hoc_ls[[i]] = col_hist
+}
+# convert hoc_ls into a matrix
+Xhoc = do.call(rbind, hoc_ls)
+Xhoc = remove_constant(Xhoc)
+```
+
+## Train-test split
+
+```{r data_split, warning = FALSE, message = FALSE}
+set.seed(3888)
+# randomly choose 20% of the tumour and immune samples as a test set
+test_id = c(sample(c(1:1000), size = 200, replace = FALSE),
+            sample(c(1001:1976), size = 196, replace = FALSE))
+# training labels
+y_train = y[-test_id]
+y_test = y[test_id]
+```
+:::
+
+# 2. Convolutional Neural Networks (CNN)
+
+```{r cnn_split, warning = FALSE, message = FALSE}
+Xmat_train = Xmat[-test_id,,,]
+Xmat_test = Xmat[test_id,,,]
+```
+
+:::: panel-tabset
+## CNN model
+
+```{r cnn_split_model, warning = FALSE, message = FALSE}
+input_shape = c(100,100,3)
+model_function = function(learning_rate = 0.001) {
+  k_clear_session() 
+  set_random_seed(3888)
+  model = keras_model_sequential() |>
+    layer_conv_2d(filters = 32,kernel_size = c(3,3), input_shape = input_shape) |> 
+    layer_max_pooling_2d(pool_size = c(3,3)) |>
+    layer_conv_2d(filters = 64, kernel_size = c(3,3)) |> 
+    layer_max_pooling_2d(pool_size = c(3,3)) |> 
+    layer_conv_2d(filters = 128, kernel_size = c(5,5)) |> 
+    layer_max_pooling_2d(pool_size = c(2,2)) |> 
+    layer_dropout(rate = .2, seed = 3888) |> 
+    layer_flatten() |> 
+    layer_dense(units = 128) |>
+    layer_dropout(rate = 0.3, seed = 3888) |> 
+    layer_dense(units = 64) |> 
+    layer_dropout(rate = 0.5, seed = 3888) |> 
+    layer_dense(units = 32) |> 
+    layer_dropout(rate = 0.7, seed = 3888) |> 
+    layer_dense(units = 2, activation = 'softmax')
+  # compile the model
+  model |> compile(
+    loss = 'categorical_crossentropy',
+    optimizer = optimizer_adam(learning_rate = learning_rate),
+    metrics = 'accuracy'
+  )
+  return(model)
+}
+model = model_function()
+model
+```
+
+## CNN learning curve
+
+```{r cnn_split_learning_curve, warning = FALSE, message = FALSE}
+# fit & draw out the learning curve of the cnn model
+yMat_train = model.matrix(~y_train-1)
+hist = model |> fit(
+  x = Xmat_train, y = yMat_train,
+  batch_size = 16,
+  steps_per_epoch = ceiling(nrow(Xmat_train)/16),
+  validation_data = list(Xmat_train, yMat_train), 
+  epochs = 20,
+  validation_split = 0.1,
+  verbose = 0
+)
+(plot(hist) + theme_classic()) |> plotly_build()
+```
+
+### Confusion matrix
+
+```{r cnn_confMat, warning = FALSE, message = FALSE}
+pred_cnn_probs = model |> predict(Xmat_test)
+pred_cnn = c('immune', 'tumour')[apply(pred_cnn_probs, 1, which.max)] |> 
+  as.factor()
+cnn_confMat = confusionMatrix(pred_cnn, y_test, positive = 'tumour')
+cnn_confMat
+```
+
+## GradCAM
+
+```{r grad_cam_prep, warning = FALSE, message = FALSE}
+load_and_process = function(img) {
+  img = img |> tf$expand_dims(0L)
+  return(img)
+}
+
+grad_model = keras_model(
+  inputs = model$inputs, 
+  outputs = c(model$get_layer('conv2d_2')$output, 
+              model$output)
+)
+
+make_gradcam_heatmap = function(img_array, y, test_images) {
+  with (
+    tf$GradientTape() %as% tape,
+    {
+      grad_model_info = grad_model(img_array)
+      last_conv_layer_output = grad_model_info[[1]]
+      preds = grad_model_info[[2]]
+      pred_index = tf$argmax(preds[1,])
+      class_channel = preds[, pred_index]
+    }
+  )
+  grads = tape$gradient(class_channel, last_conv_layer_output)
+  pooled_grads = k_mean(grads, axis = c(1,2,3))
+  last_conv_layer_output = last_conv_layer_output[1,,,]
+  last_conv_layer_output = as.array(last_conv_layer_output)
+  pooled_grads = as.array(pooled_grads)
+  for (i in 1:dim(last_conv_layer_output)[3]) {
+    last_conv_layer_output[,,i] = last_conv_layer_output[,,i] * pooled_grads[i]
+  }
+  heatmap = apply(last_conv_layer_output, c(1,2), mean)
+  heatmap = pmax(heatmap, 0)
+  heatmap = heatmap/max(heatmap)
+  write_heatmap = function(heatmap, filename, width = 200, height = 200, 
+                           bg = NA,col = viridis(100)) {
+    png(filename, width = width, height = height, bg, units = 'px', pointsize = 12, res = 300)
+    op = par(mar = c(0,0,0,0))
+    on.exit(
+      {
+        par(op)
+        dev.off()
+      },
+      add = TRUE
+    )
+    rotate = function(x) t(apply(x, 2, rev))
+    image(rotate(heatmap), axes = FALSE, asp = 1, col = col)
+  }
+  write_heatmap(heatmap, paste('img_heatmap_', y, '.png', sep = ''))
+  image = image_read(test_images)
+  info = image_info(image)
+  geometry = sprintf('%dx%d', info$width, info$height)
+  pal = col2rgb(viridis(100), alpha = TRUE)
+  alpha = floor(seq(100, 255, length = ncol(pal)))
+  pal_col = rgb(t(pal), alpha = alpha * 0.6, maxColorValue = 255)
+  write_heatmap(heatmap, paste('img_overlay_', y, '.png', sep = ''),
+                bg = NA, col = pal_col)
+  return(geometry)
+}
+```
+
+::: panel-tabset
+### Tumour
+
+#### Accurate
+
+```{r tumour_accurate_gradCam, warning = FALSE, message = FALSE}
+tumour_accurate = Xmat_test[y_test == pred_cnn & y_test == 'tumour',,,]
+tumour_accurate_index = sample(1:dim(tumour_accurate)[1], replace = FALSE, size = 20)
+# par(mfrow = c(4, 5), mar = c(0.05,0.05,0.05,0.05), oma = c(0.05,0.05,0.05,0.05))
+layout(matrix(1:20, ncol = 5, byrow = TRUE))
+par(mar = c(0.1, 0.1, 0.1, 0.1))
+for (y in tumour_accurate_index) {
+  image_temp = load_and_process(tumour_accurate[y,,,])
+  geom_temp = make_gradcam_heatmap(image_temp, y, tumour_accurate[y,,,])
+  image_temp = image_read(paste('img_overlay_', y, '.png', sep = ''))
+  image_temp = image_resize(image_temp, geom_temp, filter = 'quadratic')
+  image_temp = image_composite(
+    composite_image = image_temp,
+    image = image_convert(image_read(tumour_accurate[y,,,])),
+    operator = 'atop',
+    compose_args = '70'
+  )
+  plot(image_temp)
+}
+
+```
+
+#### Inaccurate
+
+```{r tumour_inaccurate_gradCam, warning = FALSE, message = FALSE}
+tumour_inaccurate = Xmat_test[y_test != pred_cnn & y_test == 'tumour',,,]
+layout(matrix(1:20, nrow = 4, ncol = 5, byrow = TRUE))
+if (dim(tumour_inaccurate)[1] > 20) {
+  tumour_inaccurate_index = sample(c(1:dim(tumour_inaccurate)[1]),
+                                   size = 20, replace = FALSE)} else 
+  {
+  tumour_inaccurate_index = c(1:dim(tumour_inaccurate)[1])
+}
+par(mar = c(0.1, 0.1, 0.1, 0.1))
+for (y in tumour_inaccurate_index) {
+  image_temp = load_and_process(tumour_inaccurate[y,,,])
+  geom_temp = make_gradcam_heatmap(image_temp, y, tumour_inaccurate[y,,,])
+  image_temp = image_read(paste('img_overlay_', y, '.png', sep = ''))
+  image_temp = image_resize(image_temp, geom_temp, filter = 'quadratic')
+  image_temp = image_composite(
+    composite_image = image_temp,
+    image = image_convert(image_read(tumour_inaccurate[y,,,])),
+    operator = 'atop',
+    compose_args = '70'
+  )
+  plot(image_temp)
+}
+```
+
+### Immune
+
+#### Accurate
+
+```{r immune_acurate_gradCam, warning = FALSE, message = FALSE}
+immune_accurate = Xmat_test[y_test == pred_cnn & y_test == 'immune',,,]
+immune_accurate_index = sample(1:dim(immune_accurate)[1], size = 20, replace = FALSE)
+layout(matrix(1:20, ncol = 5, byrow = TRUE))
+par(mar = c(0.1, 0.1, 0.1, 0.1))
+for (y in immune_accurate_index) {
+  image_temp = load_and_process(immune_accurate[y,,,])
+  geom_temp = make_gradcam_heatmap(image_temp, y, immune_accurate[y,,,])
+  image_temp = image_read(paste('img_overlay_', y, '.png', sep = ''))
+  image_temp = image_resize(image_temp, geom_temp, filter = 'quadratic')
+  image_temp = image_composite(
+    composite_image = image_temp,
+    image = image_convert(image_read(immune_accurate[y,,,])),
+    operator = 'atop',
+    compose_args = '70'
+  )
+  plot(image_temp)
+}
+
+```
+
+#### Inaccurate
+
+```{r immune_inaccurate, warning = FALSE, message = FALSE}
+immune_inaccurate = Xmat_test[y_test != pred_cnn & y_test == 'immune',,,]
+layout(matrix(1:20, nrow = 4, ncol = 5, byrow = TRUE))
+if (dim(immune_inaccurate)[1] <= 20) {
+  immune_inaccurate_index = c(1:dim(immune_inaccurate)[1])
+} else {
+  immune_inaccurate_index = sample(c(1:dim(immune_inaccurate)[1]),
+                                   20, replace = FALSE)
+}
+par(mar = c(0.1, 0.1, 0.1, 0.1))
+for (y in immune_inaccurate_index) {
+  image_temp = load_and_process(immune_inaccurate[y,,,])
+  geom_temp = make_gradcam_heatmap(image_temp, y, immune_inaccurate[y,,,])
+  image_temp = image_read(paste('img_overlay_', y, '.png', sep = ''))
+  image_temp = image_resize(image_temp, geom_temp, filter = 'quadratic')
+  image_temp = image_composite(
+    composite_image = image_temp,
+    image = image_convert(image_read(immune_inaccurate[y,,,])),
+    operator = 'atop',
+    compose_args = '70'
+  )
+  plot(image_temp)
+}
+```
+:::
+::::
+
+# 3. Models built on HOG
+
+```{r hog_split, warning = FALSE, message = FALSE}
+# hog training set
+Xhog_train = Xmat_hog[-test_id,]
+hog_train = as.data.frame(Xhog_train)
+hog_train$y = y_train
+# hog testing set
+Xhog_test = Xmat_hog[test_id,]
+hog_test = as.data.frame(Xhog_test)
+```
+
+:::::: panel-tabset
+## kNN
+
+::: panel-tabset
+### Model information
+
+```{r knn_hog_model, warning = FALSE, message = FALSE}
+# set train control to fine tune the hyperparameters
+train_control <- trainControl(method = "cv", number = 5)
+# fine tune hyperparameters
+tune_grid = expand.grid(k = c(1:10))
+# train the knn model
+knn_hog_model = train(y ~ ., data = hog_train, method = "knn", 
+                      trControl = train_control, tuneGrid = tune_grid)
+knn_hog_model$finalModel
+```
+
+### Model test
+
+```{r knn_hog_confMat, warning = FALSE, message = FALSE}
+knn_hog_pred = predict(knn_hog_model$finalModel, hog_test)
+knn_hog_pred = knn_hog_pred[,1]
+knn_hog_pred = ifelse(knn_hog_pred == 1, 'immune', 'tumour') |> as.factor()
+knn_hog_confMat = confusionMatrix(knn_hog_pred, y_test, positive = 'tumour')
+knn_hog_confMat
+```
+:::
+
+## Random forest
+
+::: panel-tabset
+### Model information
+
+```{r rf_hog_model, warning = FALSE, message = FALSE}
+# set up train control for rf
+train_control_rf <- trainControl(method = "cv", number = 5, search = "grid")
+
+# define a grid of hyperparameters to tune
+tune_grid = expand.grid(mtry = c(3, 7, 10))
+# train rf using cross-validation
+rf_hog_model = train(y ~ ., data = hog_train, method = "rf", 
+                     trControl = train_control, tuneGrid = tune_grid)
+rf_hog_model$finalModel
+```
+
+### Model test
+
+```{r rf_hog_test, warning = FALSE, message = FALSE}
+rf_hog_pred = predict(rf_hog_model$finalModel, hog_test)
+rf_hog_confMat = confusionMatrix(rf_hog_pred, y_test, positive = 'tumour')
+rf_hog_confMat
+```
+:::
+
+## SVM
+
+::: panel:tabset
+### Model information
+
+```{r svm_hog_model, warning = FALSE, message = FALSE}
+# set up train control
+train_control <- trainControl(method = "cv", number = 5)
+# define hyperparameter grid
+tune_grid <- expand.grid(
+  C = c(1, 10, 100),
+  sigma = c(0.01, 0.05, 0.1)
+)
+# train the model
+svm_hog_model <- train(
+  y ~ ., data = hog_train, 
+  method = "svmRadial", 
+  trControl = train_control, 
+  tuneGrid = tune_grid
+)
+svm_hog_model$finalModel
+```
+
+### Model test
+
+```{r svm_hog_test, warning = FALSE, message = FALSE}
+# test model
+svm_hog_pred = predict(svm_hog_model, hog_test)
+svm_hog_confMat = confusionMatrix(svm_hog_pred, y_test, positive = 'tumour')
+svm_hog_confMat
+```
+:::
+::::::
+
+# 4. Models built on HOC
+
+```{r hoc_split, warning = FALSE, message = FALSE}
+# hog training set
+Xhoc_train = Xhoc[-test_id,]
+# hog testing set
+Xhoc_test = Xhoc[test_id,]
+# train set
+hoc_train = as.data.frame(Xhoc_train)
+hoc_train$y = y_train
+# test set
+hoc_test = as.data.frame(Xhoc_test)
+```
+
+:::::: panel-tabset
+## kNN
+
+::: panel-tabset
+### Model information
+
+```{r knn_hoc_model, warning = FALSE, message = FALSE}
+# set train control to fine tune the hyperparameters
+train_control <- trainControl(method = "cv", number = 5)
+# fine tune hyperparameters
+tune_grid = expand.grid(k = c(1:10))
+# train the knn model
+knn_hoc_model = train(y ~ ., data = hoc_train, method = "knn", 
+                      trControl = train_control, tuneGrid = tune_grid)
+knn_hoc_model$finalModel
+```
+
+### Model test
+
+```{r knn_hoc_test, warning = FALSE, message = FALSE}
+knn_hoc_pred = predict(knn_hoc_model$finalModel, hoc_test)
+knn_hoc_pred = knn_hoc_pred[,1]
+knn_hoc_pred = ifelse(knn_hoc_pred == 1, 'immune', 'tumour') |> as.factor()
+knn_hoc_confMat = confusionMatrix(knn_hoc_pred, y_test, positive = 'tumour')
+knn_hoc_confMat
+```
+:::
+
+## Random forest
+
+::: panel-tabset
+### Model information
+
+```{r rf_hoc_model, warning = FALSE, message = FALSE}
+# set up train control for rf
+train_control_rf <- trainControl(method = "cv", number = 5, search = "grid")
+
+# define a grid of hyperparameters to tune
+tune_grid = expand.grid(mtry = c(3, 7, 10))
+# train rf using cross-validation
+rf_hoc_model = train(y ~ ., data = hoc_train, method = "rf", 
+                     trControl = train_control, tuneGrid = tune_grid)
+rf_hoc_model$finalModel
+```
+
+### Model test
+
+```{r rf_hoc_test, warning = FALSE, message = FALSE}
+rf_hoc_pred = predict(rf_hoc_model$finalModel, hoc_test)
+rf_hoc_confMat = confusionMatrix(rf_hoc_pred, y_test, positive = 'tumour')
+rf_hoc_confMat
+```
+:::
+
+## SVM
+
+::: panel-tabset
+### Model information
+
+```{r svm_hoc_model, warning = FALSE, message = FALSE}
+# set up train control
+train_control <- trainControl(method = "cv", number = 5)
+# define hyperparameter grid
+tune_grid <- expand.grid(
+  C = c(1, 10, 100),
+  sigma = c(0.01, 0.05, 0.1)
+)
+# train the model
+svm_hoc_model <- train(
+  y ~ ., data = hoc_train, 
+  method = "svmRadial", 
+  trControl = train_control, 
+  tuneGrid = tune_grid
+)
+svm_hoc_model$finalModel
+```
+
+### Model test
+
+```{r svm_hoc_test, warning = FALSE, message = FALSE}
+# test model
+svm_hoc_pred = predict(svm_hoc_model, hoc_test)
+svm_hoc_confMat = confusionMatrix(svm_hoc_pred, y_test, positive = 'tumour')
+svm_hoc_confMat
+```
+:::
+::::::
+
+# 5. Model selection
+
+::: panel-tabset
+## Accuracy
+
+```{r accuracy_eval, warning = FALSE, message = FALSE}
+model = c('CNN', '1NN on HOG', '1NN on HOC', 
+          'RF on HOG', 'RF on HOC', 
+          'SVM on HOG', 'SVM on HOC')
+base_model = c('CNN', 'kNN', 'kNN', 'RF', 'RF', 'SVM', 'SVM')
+feature_type = c('All', 'HOG', 'HOC', 'HOG', 'HOC', 'HOG', 'HOC')
+accuracy = c(cnn_confMat$byClass[[11]], 
+             knn_hog_confMat$byClass[[11]], knn_hoc_confMat$byClass[[11]],
+             rf_hog_confMat$byClass[[11]], rf_hoc_confMat$byClass[[11]],
+             svm_hog_confMat$byClass[[11]], svm_hoc_confMat$byClass[[11]])
+accuracy_df = as.data.frame(model |> as.character())
+accuracy_df$base_model = base_model |> as.factor()
+accuracy_df$feature_type = feature_type |> as.factor()
+accuracy_df$accuracy = accuracy
+(ggplot(data = accuracy_df, aes(x = base_model, y = accuracy, fill = feature_type)) + 
+  geom_col(position = 'dodge') + theme_classic() + 
+    labs(title = 'Models\' accuracy when being tested by a left-out test set',
+         y = 'Accuracy', x = 'Base model', fill = 'Feature used')) |> 
+  ggplotly()
+```
+
+## Precision & recall
+
+```{r prec_recall, warning = FALSE, message = FALSE}
+prec = c(cnn_confMat$byClass[[5]], knn_hog_confMat$byClass[[5]], knn_hoc_confMat$byClass[[5]],
+         rf_hog_confMat$byClass[[5]], rf_hoc_confMat$byClass[[5]],
+         svm_hog_confMat$byClass[[5]], svm_hoc_confMat$byClass[[5]])
+recall = c(cnn_confMat$byClass[[6]], knn_hog_confMat$byClass[[6]], knn_hoc_confMat$byClass[[6]],
+           rf_hog_confMat$byClass[[6]], rf_hoc_confMat$byClass[[6]],
+           svm_hog_confMat$byClass[[6]], svm_hoc_confMat$byClass[[6]])
+f1 = c(cnn_confMat$byClass[[7]], knn_hog_confMat$byClass[[7]], knn_hoc_confMat$byClass[[7]],
+           rf_hog_confMat$byClass[[7]], rf_hoc_confMat$byClass[[7]],
+           svm_hog_confMat$byClass[[7]], svm_hoc_confMat$byClass[[7]])
+prec_recall_df = as.data.frame(model)
+prec_recall_df$prec = prec
+prec_recall_df$recall = recall
+prec_recall_df$f1 = f1
+prec_recall = ggplot(data = prec_recall_df, 
+                     aes(x = prec, y = recall, label = model)) +
+    geom_point(aes(color = f1), size = 3) +
+    geom_label_repel(size = 5, max.overlaps = 10, box.padding = 0.35,
+    point.padding = 0.5, min.segment.length = 0) +
+    labs(title = 'Model\'s precision and accuracy when being tested by a left-out test set', x = 'Precision', y = 'Recall', color = 'F1 score') + 
+    theme_classic()
+prec_recall
+```
+
+## Table
+
+```{r summary_table, warning = FALSE, message = FALSE}
+sum_tab = as.data.frame(model)
+sum_tab$accuracy = accuracy |> round(3)
+sum_tab$prec = prec |> round(3)
+sum_tab$recall = recall |> round(3)
+sum_tab$f1 = f1 |> round(3)
+sum_tab |> sort_by(accuracy, decreasing = TRUE) |> DT::datatable()
+```
+:::
+
+# Reference
+
+Lainconn. (2024, June 21). *Grad-CAM\[R\]\[Tensorflow2\]*. Kaggle.com; Kaggle. https://www.kaggle.com/code/lainconn/grad-cam-r-tensorflow2
+
+Singh, A. (2019, September 4). *Feature Descriptor \| Hog Descriptor Tutorial*. Analytics Vidhya. https://www.analyticsvidhya.com/blog/2019/09/feature-engineering-images-introduction-hog-feature-descriptor/
