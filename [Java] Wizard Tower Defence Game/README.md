@@ -1,4 +1,4 @@
-# 🎮 Java Game: [Wizard Tower Defence]
+# 🎮 Java Game: Wizard Tower Defence
 
 A Java-based game developed using **Gradle**, featuring infinite randomized rounds for a unique experience each time you play.
 
